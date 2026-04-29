@@ -19,11 +19,16 @@ import requests
 import json
 
 app = FastAPI()
+@app.get('/')
+def main():
+    return {"status":"Application deployed"}
 
 @app.get("/train_model")
 def train_model():
     return get_stations()
-
+def get_training_time(){
+    
+}
 def get_stations():
     stations_url = "https://gracian.ca/laravel/public/api/stations"
     res = requests.get(stations_url)
