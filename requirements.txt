@@ -1,2 +1,10 @@
 uvicorn
 fastapi
+numpy
+pandas
+scikit-learn
+scipy
+matplotlib
+joblib
+beautifulsoup4
+requests
