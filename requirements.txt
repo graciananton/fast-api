@@ -8,3 +8,4 @@ matplotlib
 joblib
 beautifulsoup4
 requests
+dotenv
