@@ -18,19 +18,9 @@ import pandas as pd
 import requests
 import json
 
-app = FastAPI()
-@app.get('/')
-def main():
-    return {"status":"Application deployed"}
+from fastapi import FastAPI
+from api.routes import router
 
-@app.get("/train_model")
-def train_model():
-    return get_stations()
-def get_training_time(){
-    
-}
-def get_stations():
-    stations_url = "https://gracian.ca/laravel/public/api/stations"
-    res = requests.get(stations_url)
-    stations = res.json()
-    return stations
+app = FastAPI()
+
+app.include_router(router)
