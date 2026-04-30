@@ -3,6 +3,13 @@ from dotenv import load_dotenv
 import os
 from datetime import datetime, timezone, timedelta
 import pandas as pd
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+from fastapi.responses import Response
+from fastapi.responses import FileResponse
+import io
+
 load_dotenv() 
 
 STATIONS_URL = os.getenv("STATIONS_URL")
@@ -53,9 +60,60 @@ def get_station_df(station_id:str, days:int):
         axis=1
     )
 
-    merged_df = create_merged_df(weather_expanded_df, readings_df)
+    df_merged = create_merged_df(weather_expanded_df, readings_df)
 
-    return merged_df
+    return df_merged
+
+
+
+def extract_predictors_labels(df):
+    df_predictors = df.drop(columns=['levelAtHour','measuredAt','stationId'])
+    df_labels = df['levelAtHour']
+    return df_predictors, df_labels
+
+
+def extract_numeric_columns(df):
+    numeric_cols = df.select_dtypes(include=['number']).columns
+    return numeric_cols
+
+def plot(df, title)->Response:
+    buf = io.BytesIO()
+    plt.figure()
+    df.plot(x='measuredAt', y=['levelAtHour','temperature_2m','precipitation','rain','pressure_msl'], title = title)
+    plt.savefig(buf, format="png")
+    buf.seek(0)
+    return Response(content=buf.getvalue(), media_type="image/png")
+
+
+def get_past_training_test_df(df):
+    df_merged_past, df_merged_future = split_past_future(df)
+
+    df_merged_past_with_id = add_index(df_merged_past)
+    df_merged_future_with_id = add_index(df_merged_future)
+    
+
+    df_merged_past_training_set, df_merged_past_test_set = split_train_test_by_id(df_merged_past_with_id,.2,'index')
+
+    return df_merged_past_training_set, df_merged_past_test_set
+
+
+def split_past_future(df):
+    df_merged_past = df.loc[:df['levelAtHour'].isna().idxmax() - 1]
+    df_merged_future = df.loc[df['levelAtHour'].isna().idxmax():len(df)]
+    return df_merged_past, df_merged_future
+
+def split_train_test_by_id(df_merged, test_ratio, id_column):
+    ids = df_merged[id_column]
+    in_test_set = ids.apply(lambda id_: test_set_check(id_, test_ratio * len(ids)))
+    return df_merged.loc[~in_test_set], df_merged.loc[in_test_set]
+
+def test_set_check(identifier, determining):
+    return identifier < determining
+
+def add_index(df):
+    df = df.reset_index()
+    return df
+
 
 def create_merged_df(df_weather_expanded, df_readings):
     df_weather_expanded = df_weather_expanded[['measuredAt','temperature_2m','precipitation','snowfall','relative_humidity_2m','pressure_msl','rain','wind_speed_10m','stationId']].merge(
