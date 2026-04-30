@@ -9,6 +9,8 @@ import matplotlib.pyplot as plt
 from fastapi.responses import Response
 from fastapi.responses import FileResponse
 import io
+from sklearn.metrics import mean_squared_error
+import numpy as np
 
 load_dotenv() 
 
@@ -84,6 +86,18 @@ def plot(df, title)->Response:
     buf.seek(0)
     return Response(content=buf.getvalue(), media_type="image/png")
 
+def test_model(model, predictors):
+    predictions = model.predict(predictors)
+    return predictions
+
+def get_future_df(df_merged):
+    df_merged_past, df_merged_future = split_past_future(df_merged)
+    return add_index(df_merged_future)
+
+def get_forest_rmse(forest_reg, predictors, labels):
+    predictions = test_model(forest_reg, predictors)
+    rmse = np.sqrt(mean_squared_error(labels, predictions))
+    return rmse
 
 def get_past_training_test_df(df):
     df_merged_past, df_merged_future = split_past_future(df)
