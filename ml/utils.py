@@ -14,21 +14,30 @@ def get_stations()->dict:
     stations = res.json()
     return stations
 
-def days_ago(days:int):
+def get_days_ago(days:int):
     time_now = datetime.now(timezone.utc)
     time_ago = time_now - timedelta(days = days)
     formatted_time_ago = time_ago.strftime("%Y-%m-%d %H:%M:%S.%f")
     return formatted_time_ago
 
-def get_station_df(station_id:str, days:int)->pd.DataFrame:
-    days_ago = days_ago(days)
-    readings_url = f"{READINGS_URL}?from={days_ago}&stationId={station_id}&f=json"
+def get_station_df(station_id:str, days:int):
+
+    days_ago = get_days_ago(days)
+    return {"hello":"world"}
+
+    with open("../logs.txt","a") as f:
+        f.write("Number of days ago "+days_ago)
+
+    readings_url = f"https://gracian.ca/laravel/public/api/readings?from={days_ago}&stationId={station_id}&f=json"
+    return readings_url
+
     readings_data = get_data_by_url(readings_url)
-    weather_url = f"{WEATHER_URL}?from={days_ago}&stationId={station_id}&f=json&limit=1000000000000"
+    weather_url = f"https://gracian.ca/laravel/public/api/weather?from={days_ago}&stationId={station_id}&f=json&limit=10000000000"
     weather_data = get_data_by_url(weather_url)
+
     weather_df = convert_to_df(weather_data)
     readings_df = convert_to_df(readings_data)
-    
+
     weather_df['measuredAt'] = convert_to_datetime(weather_df['measuredAt'])
     readings_df['measuredAt'] = convert_to_datetime(readings_df['measuredAt'])
 
