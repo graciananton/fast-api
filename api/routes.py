@@ -16,5 +16,5 @@ def train_model():
     ##numeric_cols = merged_df.select_dtypes(include=['number']).columns
     ##scaler = StandardScaler()
 
-    return merged_df
+    return merged_df.to_json()
 

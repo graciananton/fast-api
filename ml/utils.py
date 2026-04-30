@@ -23,15 +23,15 @@ def get_days_ago(days:int):
 def get_station_df(station_id:str, days:int):
 
     days_ago = get_days_ago(days)
-    return {"hello":"world"}
 
-    with open("../logs.txt","a") as f:
-        f.write("Number of days ago "+days_ago)
+    #with open("../logs.txt","a") as f:
+    #    f.write("Number of days ago "+days_ago)
 
     readings_url = f"https://gracian.ca/laravel/public/api/readings?from={days_ago}&stationId={station_id}&f=json"
-    return readings_url
+    #return readings_url
 
     readings_data = get_data_by_url(readings_url)
+
     weather_url = f"https://gracian.ca/laravel/public/api/weather?from={days_ago}&stationId={station_id}&f=json&limit=10000000000"
     weather_data = get_data_by_url(weather_url)
 
