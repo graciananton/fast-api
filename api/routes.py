@@ -3,7 +3,6 @@ from sklearn.preprocessing import StandardScaler
 from fastapi.responses import Response
 from ml import utils
 from ml import train
-from typing import Dict
 import pandas as pd
 import joblib
 
@@ -13,8 +12,8 @@ router = APIRouter()
 def running():
     return {"status":"Application running"}
 
-@router.get("/test_model")
-def test_model(station_id:str, days:int)->Dict[str,int]:
+@router.get("/test_model", response_class=dict[str,int])
+def test_model(station_id:str, days:int)->dict[str,int]:
     df_merged = utils.get_station_df(station_id,days)
 
     df_merged_past_training_set, df_merged_past_test_set = utils.get_past_training_test_df(df_merged)
@@ -37,11 +36,11 @@ def plot_test(station_id:str, days:int)->Response:
     return utils.plot(df_merged_past_test_set_copy, "Past Test Set")
     #print(df_merged_past_test_set_copy)
 
-@router.get("/train_model",response_class=Dict[str,str])
-def train_model(station_id:str, days:int)->Dict[str,str]:
+@router.get("/train_model",response_class= dict[str, int])
+def train_model(station_id:str, days:int) -> dict[str, str]:
     df_merged = utils.get_station_df(station_id,days)
     print(df_merged)
-    
+
     df_merged_past_training_set, df_merged_past_test_set = utils.get_past_training_test_df(df_merged)
 
     df_merged_past_training_set_predictors, df_merged_past_training_set_labels = utils.extract_predictors_labels(df_merged_past_training_set)
