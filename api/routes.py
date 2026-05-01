@@ -8,6 +8,7 @@ import joblib
 from pydantic import BaseModel
 from typing import Optional
 from fastapi import Depends
+import os
 
 class ModelRequest(BaseModel):
     station_id: str
@@ -16,8 +17,8 @@ class ModelRequest(BaseModel):
 router = APIRouter()
 
 @router.get("/")
-def running():
-    return {"status":"Application running"}
+def running()->dict[str,list[str]]:
+    return {"status": os.listdir("models")}
 
 
 @router.get("/train_model")
