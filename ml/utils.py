@@ -73,7 +73,6 @@ def extract_predictors_labels(df):
     df_labels = df['levelAtHour']
     return df_predictors, df_labels
 
-
 def extract_numeric_columns(df):
     numeric_cols = df.select_dtypes(include=['number']).columns
     return numeric_cols
