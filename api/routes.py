@@ -40,7 +40,8 @@ def plot_test(station_id:str, days:int)->Response:
 @router.get("/train_model",response_class=Dict[str,str])
 def train_model(station_id:str, days:int)->Dict[str,str]:
     df_merged = utils.get_station_df(station_id,days)
-
+    print(df_merged)
+    
     df_merged_past_training_set, df_merged_past_test_set = utils.get_past_training_test_df(df_merged)
 
     df_merged_past_training_set_predictors, df_merged_past_training_set_labels = utils.extract_predictors_labels(df_merged_past_training_set)
