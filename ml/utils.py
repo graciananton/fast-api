@@ -76,7 +76,8 @@ def extract_numeric_columns(df):
 def plot(df, title)->Response:
     buf = io.BytesIO()
     plt.figure()
-    df.plot(x='measuredAt', y=['levelAtHour','temperature_2m','precipitation','rain','pressure_msl'], title = title+" "+df['stationId'].iloc[0])
+    print(df['stationId'])
+    df.plot(x='measuredAt', y=['levelAtHour','temperature_2m','precipitation','rain','pressure_msl'], title = title)
     plt.savefig(buf, format="png")
     buf.seek(0)
     return Response(content=buf.getvalue(), media_type="image/png")
