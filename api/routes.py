@@ -1,11 +1,11 @@
 from fastapi import APIRouter
-from ml import utils
 from sklearn.preprocessing import StandardScaler
-import joblib
+from fastapi.responses import Response
+from ml import utils
 from ml import train
 from typing import Dict
-from fastapi.responses import Response
 import pandas as pd
+import joblib
 
 router = APIRouter()
 
