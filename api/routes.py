@@ -5,6 +5,13 @@ from ml import utils
 from ml import train
 import pandas as pd
 import joblib
+from pydantic import BaseModel
+from typing import Optional
+from fastapi import Depends
+
+class ModelRequest(BaseModel):
+    station_id: str
+    days: Optional[int] = 100
 
 router = APIRouter()
 
@@ -12,39 +19,10 @@ router = APIRouter()
 def running():
     return {"status":"Application running"}
 
-@router.get("/test_model")
-def test_model(station_id:str, days:int)->dict[str,float]:
-    df_merged = utils.get_station_df(station_id,days)
-
-    df_merged_past_training_set, df_merged_past_test_set = utils.get_past_training_test_df(df_merged)
-
-    df_merged_past_test_set_predictors, df_merged_past_test_set_labels = utils.extract_predictors_labels(df_merged_past_test_set)
-
-    model_path = f"models/forest_reg_{station_id}.pkl"
-
-    forest_reg = joblib.load(model_path)
-
-    #forest_reg = joblib.load("forest_reg.pkl")
-
-    forest_reg_rmse = utils.get_forest_rmse(forest_reg, df_merged_past_test_set_predictors, df_merged_past_test_set_labels)
-    return {"RMSE": forest_reg_rmse}
-
-@router.get("/plot_test",response_class=Response)
-def plot_test(station_id:str, days:int)->Response:
-    scaler = StandardScaler()
-    df_merged = utils.get_station_df(station_id,days)
-    df_merged_past_training_set, df_merged_past_test_set = utils.get_past_training_test_df(df_merged)
-    df_merged_past_test_set_copy = df_merged_past_test_set.copy()
-    numeric_cols = utils.extract_numeric_columns(df_merged_past_test_set_copy)
-    df_merged_past_test_set_copy[numeric_cols] = scaler.fit_transform(df_merged_past_test_set_copy[numeric_cols])
-    
-    return utils.plot(df_merged_past_test_set_copy, "Past Test Set")
-    #print(df_merged_past_test_set_copy)
 
 @router.get("/train_model")
-def train_model(station_id:str, days:int) -> dict[str, str]:
-    df_merged = utils.get_station_df(station_id,days)
-    print(df_merged)
+def train_model(request: ModelRequest = Depends()) -> dict[str, str]:
+    df_merged = utils.get_station_df(request.station_id,request.days)
 
     df_merged_past_training_set, df_merged_past_test_set = utils.get_past_training_test_df(df_merged)
 
@@ -55,18 +33,50 @@ def train_model(station_id:str, days:int) -> dict[str, str]:
             df_merged_past_training_set_labels
     )
 
-    model_path = f"models/forest_reg_{station_id}.pkl"
+    model_path = f"models/forest_reg_{request.station_id}.pkl"
 
     joblib.dump(forest_reg, model_path)
 
     return {'status':"Finished Re-training The Model"}
 
+@router.get("/test_model")
+def test_model(request: ModelRequest = Depends())->dict[str,float]:
+    df_merged = utils.get_station_df(request.station_id,request.days)
+
+    df_merged_past_training_set, df_merged_past_test_set = utils.get_past_training_test_df(df_merged)
+
+    df_merged_past_test_set_predictors, df_merged_past_test_set_labels = utils.extract_predictors_labels(df_merged_past_test_set)
+
+    model_path = f"models/forest_reg_{request.station_id}.pkl"
+
+    forest_reg = joblib.load(model_path)
+
+    #forest_reg = joblib.load("forest_reg.pkl")
+
+    forest_reg_rmse = utils.get_forest_rmse(forest_reg, df_merged_past_test_set_predictors, df_merged_past_test_set_labels)
+    return {"RMSE": forest_reg_rmse}
+
+
+
+@router.get("/plot_test",response_class=Response)
+def plot_test(request: ModelRequest = Depends())->Response:
+    scaler = StandardScaler()
+    df_merged = utils.get_station_df(request.station_id,request.days)
+    df_merged_past_training_set, df_merged_past_test_set = utils.get_past_training_test_df(df_merged)
+    df_merged_past_test_set_copy = df_merged_past_test_set.copy()
+    numeric_cols = utils.extract_numeric_columns(df_merged_past_test_set_copy)
+    df_merged_past_test_set_copy[numeric_cols] = scaler.fit_transform(df_merged_past_test_set_copy[numeric_cols])
+    
+    return utils.plot(df_merged_past_test_set_copy, "Past Test Set")
+    #print(df_merged_past_test_set_copy)
+
+
 
 @router.get("/plot_train",response_class=Response)
-def plot_train(station_id:str, days:int)->Response:
+def plot_train(request: ModelRequest = Depends())->Response:
     scaler = StandardScaler()
 
-    df_merged = utils.get_station_df(station_id,days)
+    df_merged = utils.get_station_df(request.station_id,request.days)
 
     df_merged_past_training_set, df_merged_past_test_set = utils.get_past_training_test_df(df_merged)
     
@@ -79,16 +89,16 @@ def plot_train(station_id:str, days:int)->Response:
     return utils.plot(df_merged_past_training_set_copy, "Past Training Set")
 
 @router.get("/future_set")
-def future_set(station_id:str):
+def future_set(request: ModelRequest = Depends()):
     scaler = StandardScaler()
 
-    df_merged = utils.get_station_df(station_id, days = 30)
+    df_merged = utils.get_station_df(request.station_id, request.days)
 
     df_merged_future = utils.get_future_df(df_merged)
 
     df_merged_future_predictors, df_merged_future_labels = utils.extract_predictors_labels(df_merged_future)
 
-    model_path = f"models/forest_reg_{station_id}.pkl"
+    model_path = f"models/forest_reg_{request.station_id}.pkl"
 
     forest_reg = joblib.load(model_path)
 
@@ -107,7 +117,7 @@ def future_set(station_id:str):
     return (df_merged_future_predictions_copy).to_dict(orient='records')
 
 @router.get("/plot_future")
-def plot_future(station_id:str)->Response:
-    df_merged_future_predictions_copy = pd.DataFrame(future_set(station_id))
+def plot_future(request: ModelRequest = Depends())->Response:
+    df_merged_future_predictions_copy = pd.DataFrame(future_set(request))
     return utils.plot(df_merged_future_predictions_copy, "Future Predictions")
 
