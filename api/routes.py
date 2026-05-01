@@ -12,15 +12,20 @@ router = APIRouter()
 def running():
     return {"status":"Application running"}
 
-@router.get("/test_model", response_class=dict[str,int])
-def test_model(station_id:str, days:int)->dict[str,int]:
+@router.get("/test_model")
+def test_model(station_id:str, days:int)->dict[str,float]:
     df_merged = utils.get_station_df(station_id,days)
 
     df_merged_past_training_set, df_merged_past_test_set = utils.get_past_training_test_df(df_merged)
 
     df_merged_past_test_set_predictors, df_merged_past_test_set_labels = utils.extract_predictors_labels(df_merged_past_test_set)
 
-    forest_reg = joblib.load("forest_reg.pkl")
+    model_path = f"models/forest_reg_{station_id}.pkl"
+
+    forest_reg = joblib.load(model_path)
+
+    #forest_reg = joblib.load("forest_reg.pkl")
+
     forest_reg_rmse = utils.get_forest_rmse(forest_reg, df_merged_past_test_set_predictors, df_merged_past_test_set_labels)
     return {"RMSE": forest_reg_rmse}
 
@@ -36,7 +41,7 @@ def plot_test(station_id:str, days:int)->Response:
     return utils.plot(df_merged_past_test_set_copy, "Past Test Set")
     #print(df_merged_past_test_set_copy)
 
-@router.get("/train_model",response_class= dict[str, int])
+@router.get("/train_model")
 def train_model(station_id:str, days:int) -> dict[str, str]:
     df_merged = utils.get_station_df(station_id,days)
     print(df_merged)
@@ -49,9 +54,13 @@ def train_model(station_id:str, days:int) -> dict[str, str]:
             df_merged_past_training_set_predictors, 
             df_merged_past_training_set_labels
     )
-    joblib.dump(forest_reg, "forest_reg.pkl")
+
+    model_path = f"models/forest_reg_{station_id}.pkl"
+
+    joblib.dump(forest_reg, model_path)
 
     return {'status':"Finished Re-training The Model"}
+
 
 @router.get("/plot_train",response_class=Response)
 def plot_train(station_id:str, days:int)->Response:
@@ -79,7 +88,10 @@ def future_set(station_id:str):
 
     df_merged_future_predictors, df_merged_future_labels = utils.extract_predictors_labels(df_merged_future)
 
-    forest_reg = joblib.load("forest_reg.pkl")
+    model_path = f"models/forest_reg_{station_id}.pkl"
+
+    forest_reg = joblib.load(model_path)
+
     predictions = utils.test_model(forest_reg, df_merged_future_predictors)
 
     predictions = pd.DataFrame(predictions, columns=['levelAtHour'])
