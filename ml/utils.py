@@ -33,11 +33,7 @@ def get_station_df(station_id:str, days:int):
 
     days_ago = get_days_ago(days)
 
-    #with open("../logs.txt","a") as f:
-    #    f.write("Number of days ago "+days_ago)
-
     readings_url = f"https://gracian.ca/laravel/public/api/readings?from={days_ago}&stationId={station_id}&f=json"
-    #return readings_url
 
     readings_data = get_data_by_url(readings_url)
 
