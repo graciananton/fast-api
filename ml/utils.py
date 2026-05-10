@@ -62,8 +62,6 @@ def get_station_df(station_id:str, days:int):
 
     return df_merged
 
-
-
 def extract_predictors_labels(df):
     df_predictors = df.drop(columns=['levelAtHour','measuredAt','stationId'])
     df_labels = df['levelAtHour']

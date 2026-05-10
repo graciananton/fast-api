@@ -113,7 +113,9 @@ def future_set(request: ModelRequest = Depends()):
     df_merged_future_predictions_copy = df_merged_future_predictions.copy()
     numeric_cols = utils.extract_numeric_columns(df_merged_future_predictions_copy)
 
-    df_merged_future_predictions_copy[numeric_cols] = scaler.fit_transform(df_merged_future_predictions_copy[numeric_cols])
+    #df_merged_future_predictions_copy[numeric_cols] = scaler.fit_transform(df_merged_future_predictions_copy[numeric_cols])
+    
+    #df_merged_future_predictions_copy[numeric_cols] = df_merged_future_predictions_copy[numeric_cols]
 
     return (df_merged_future_predictions_copy).to_dict(orient='records')
 
