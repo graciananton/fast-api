@@ -20,7 +20,6 @@ router = APIRouter()
 def running()->dict[str,list[str]]:
     return {"status": os.listdir("models")}
 
-
 @router.get("/train_model")
 def train_model(request: ModelRequest = Depends()) -> dict[str, str]:
     df_merged = utils.get_station_df(request.station_id,request.days)
