@@ -72,6 +72,8 @@ def plot_test(request: ModelRequest = Depends())->Response:
 
 
 
+
+
 @router.get("/plot_train",response_class=Response)
 def plot_train(request: ModelRequest = Depends())->Response:
     scaler = StandardScaler()
@@ -88,8 +90,14 @@ def plot_train(request: ModelRequest = Depends())->Response:
 
     return utils.plot(df_merged_past_training_set_copy, "Past Training Set")
 
+@router.get("/plot_future")
+def plot_future(request: ModelRequest = Depends())->Response:
+    df_merged_future_predictions_copy = pd.DataFrame(future_set(request))
+    return utils.plot(df_merged_future_predictions_copy, "Future Predictions")
+
 @router.get("/future_set")
 def future_set(request: ModelRequest = Depends()):
+    
     scaler = StandardScaler()
 
     df_merged = utils.get_station_df(request.station_id, request.days)
@@ -99,6 +107,7 @@ def future_set(request: ModelRequest = Depends()):
     df_merged_future_predictors, df_merged_future_labels = utils.extract_predictors_labels(df_merged_future)
 
     model_path = f"models/forest_reg_{request.station_id}.pkl"
+    
 
     forest_reg = joblib.load(model_path)
 
@@ -118,8 +127,4 @@ def future_set(request: ModelRequest = Depends()):
 
     return (df_merged_future_predictions_copy).to_dict(orient='records')
 
-@router.get("/plot_future")
-def plot_future(request: ModelRequest = Depends())->Response:
-    df_merged_future_predictions_copy = pd.DataFrame(future_set(request))
-    return utils.plot(df_merged_future_predictions_copy, "Future Predictions")
 

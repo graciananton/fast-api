@@ -75,9 +75,10 @@ def plot(df, title)->Response:
     buf = io.BytesIO()
     #+" - "+df[['stationId']].iloc[0]['stationId']
     plt.figure()
-    df.plot(x='measuredAt', y=['levelAtHour','temperature_2m','precipitation','rain','pressure_msl'], title = title)
+    df.plot(x='measuredAt', y=['levelAtHour','temperature_2m','precipitation','rain'], title = title)
     plt.savefig(buf, format="png")
     buf.seek(0)
+    plt.close()
     return Response(content=buf.getvalue(), media_type="image/png")
 
 def test_model(model, predictors):
