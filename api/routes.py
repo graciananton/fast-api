@@ -49,19 +49,20 @@ def train_model(request: ModelRequest = Depends()) -> dict[str, str]:
 
 @router.get("/test_model")
 def test_model(request: ModelRequest = Depends())->dict[str,float]:
+    print("Load station data")
     df_merged = utils.get_station_df(request.station_id,request.days)
-
+    print("Split train test")
     df_merged_past_training_set, df_merged_past_test_set = utils.get_past_training_test_df(df_merged)
-
+    print("Extract test features")
     df_merged_past_test_set_predictors, df_merged_past_test_set_labels = utils.extract_predictors_labels(df_merged_past_test_set)
-
+    print("Build model path")
     model_path = f"models/forest_reg_{request.station_id}.pkl"
-
+    print("Load trained model")
     forest_reg = joblib.load(model_path)
-
+    print("Calculate model RMSE")
     #forest_reg = joblib.load("forest_reg.pkl")
-
     forest_reg_rmse = utils.get_forest_rmse(forest_reg, df_merged_past_test_set_predictors, df_merged_past_test_set_labels)
+    print("Return RMSE result")
     return {"RMSE": forest_reg_rmse}
 
 
