@@ -22,21 +22,29 @@ def running()->dict[str,list[str]]:
 
 @router.get("/train_model")
 def train_model(request: ModelRequest = Depends()) -> dict[str, str]:
+    print("Training model")
+    print("DF merged")
+
     df_merged = utils.get_station_df(request.station_id,request.days)
-
+    
+    print("Df merged past training and test set")
     df_merged_past_training_set, df_merged_past_test_set = utils.get_past_training_test_df(df_merged)
-
+    
+    print("past training set labels & predictors")
     df_merged_past_training_set_predictors, df_merged_past_training_set_labels = utils.extract_predictors_labels(df_merged_past_training_set)
 
+    print("forest_reg model")
     forest_reg = train.create_forest(
             df_merged_past_training_set_predictors, 
             df_merged_past_training_set_labels
     )
 
+    print("Model Path")
     model_path = f"models/forest_reg_{request.station_id}.pkl"
 
+    print("Dumping model")
     joblib.dump(forest_reg, model_path)
-
+    print("Returning status")
     return {'status':"Finished Re-training The Model"}
 
 @router.get("/test_model")
