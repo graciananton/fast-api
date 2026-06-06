@@ -12,7 +12,7 @@ import os
 
 class ModelRequest(BaseModel):
     station_id: str
-    days: Optional[int] = 100
+    days: Optional[int] = 50
 
 router = APIRouter()
 
@@ -98,6 +98,7 @@ def plot_train(request: ModelRequest = Depends())->Response:
     df_merged_past_training_set_copy[numeric_cols] = scaler.fit_transform(df_merged_past_training_set_copy[numeric_cols])
 
     return utils.plot(df_merged_past_training_set_copy, "Past Training Set")
+
 
 @router.get("/plot_future")
 def plot_future(request: ModelRequest = Depends())->Response:
