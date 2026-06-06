@@ -74,6 +74,9 @@ def plot_test(request: ModelRequest = Depends())->Response:
     df_merged_past_training_set, df_merged_past_test_set = utils.get_past_training_test_df(df_merged)
     df_merged_past_test_set_copy = df_merged_past_test_set.copy()
     numeric_cols = utils.extract_numeric_columns(df_merged_past_test_set_copy)
+
+    print(df_merged_past_test_set_copy[numeric_cols])
+
     df_merged_past_test_set_copy[numeric_cols] = scaler.fit_transform(df_merged_past_test_set_copy[numeric_cols])
     
     return utils.plot(df_merged_past_test_set_copy, "Past Test Set")
@@ -94,6 +97,8 @@ def plot_train(request: ModelRequest = Depends())->Response:
     df_merged_past_training_set_copy = df_merged_past_training_set.copy()
 
     numeric_cols = utils.extract_numeric_columns(df_merged_past_training_set_copy)
+
+    print(df_merged_past_training_set_copy)
 
     df_merged_past_training_set_copy[numeric_cols] = scaler.fit_transform(df_merged_past_training_set_copy[numeric_cols])
 
