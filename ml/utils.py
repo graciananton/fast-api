@@ -100,13 +100,11 @@ def get_past_training_test_df(df):
     df_merged_past_with_id = add_index(df_merged_past)
     df_merged_future_with_id = add_index(df_merged_future)
 
-
-
     df_merged_past_training_set, df_merged_past_test_set = split_train_test_by_id(df_merged_past_with_id,.2,'index')
 
     print("returning get past training test df")
-
     print(df_merged_past_training_set)
+    
     return df_merged_past_training_set, df_merged_past_test_set
 
 
