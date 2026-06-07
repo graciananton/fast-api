@@ -88,7 +88,6 @@ def plot_test(request: ModelRequest = Depends())->Response:
 
 @router.get("/plot_train",response_class=Response)
 def plot_train(request: ModelRequest = Depends())->Response:
-    print("Plotting train")
     scaler = StandardScaler()
 
     df_merged = utils.get_station_df(request.station_id,request.days)
@@ -99,17 +98,10 @@ def plot_train(request: ModelRequest = Depends())->Response:
         
     df_merged_past_training_set_copy = df_merged_past_training_set.copy()
 
-    print(df_merged_past_training_set_copy)
-
     numeric_cols = utils.extract_numeric_columns(df_merged_past_training_set_copy)
-
-    print("Numeric columns")
-    print(numeric_cols)
 
     df_merged_past_training_set_copy[numeric_cols] = scaler.fit_transform(df_merged_past_training_set_copy[numeric_cols])
 
-    print(df_merged_past_training_set_copy)
-    
     return utils.plot(df_merged_past_training_set_copy, "Past Training Set")
 
 

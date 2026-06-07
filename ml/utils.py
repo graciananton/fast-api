@@ -106,7 +106,12 @@ def get_past_training_test_df(df):
 
 
 def split_past_future(df):
+    print("df")
+    print(df)
+
     df_merged_past = df.loc[:df['levelAtHour'].isna().idxmax() - 1]
+    print(df_merged_past)
+
     df_merged_future = df.loc[df['levelAtHour'].isna().idxmax():len(df)]
     return df_merged_past, df_merged_future
 
