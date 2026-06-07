@@ -108,6 +108,8 @@ def plot_train(request: ModelRequest = Depends())->Response:
 
     df_merged_past_training_set_copy[numeric_cols] = scaler.fit_transform(df_merged_past_training_set_copy[numeric_cols])
 
+    print(df_merged_past_training_set_copy)
+    
     return utils.plot(df_merged_past_training_set_copy, "Past Training Set")
 
 
