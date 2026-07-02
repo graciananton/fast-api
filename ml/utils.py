@@ -152,6 +152,10 @@ def plot(df, title)->Response:
             fontsize=10,
             color="#0057E7"
         )
+
+        ax.set_xlabel("Time (Toronto/America)")
+        ax.set_ylabel("Water Level (m)")
+
     else:
         ax = df.plot(
             kind = 'line', 
