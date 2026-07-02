@@ -12,6 +12,8 @@ import io
 from sklearn.metrics import mean_squared_error
 import numpy as np
 from datetime import datetime, UTC
+import matplotlib.dates as mdates
+import re
 
 load_dotenv() 
 
@@ -119,7 +121,33 @@ def plot(df, title)->Response:
             label = "Measured"
         )
 
-        after.plot(
+        print("Tick Labels")
+        print(ax.get_xticklabels())
+        """"
+        ax.xaxis.set_major_formatter(
+          mdates.DateFormatter("%H:%M")
+        )
+        """
+
+        # print("Tick labels")
+
+        times = map(getTimes, ax.get_ticklabels())
+        
+        ax.set_xticklabels(times, rotation=0, ha='center')
+
+        
+        ax.spines["top"].set_linewidth(0)
+
+        ax.spines["bottom"].set_color("gray")
+        ax.spines["bottom"].set_linewidth(1)
+
+        ax.spines["left"].set_color("gray")
+        ax.spines["left"].set_linewidth(1)
+
+        ax.spines["right"].set_linewidth(0)
+        
+        
+        ax2 = after.plot(
             kind = 'line', 
             x='measuredAt', 
             y='levelAtHour', 
@@ -130,12 +158,18 @@ def plot(df, title)->Response:
             label = "Predicted"
         )
 
+        ax2.xaxis.set_major_formatter(
+          mdates.DateFormatter("%H:%M")
+        )
+
+        ax2.set_xticklabels(ax2.get_xticklabels(), rotation=0, ha='center')
+
         ax.scatter(
             utc_time,
             level,
-            color = 'red',
+            color = '#0057E7',
             marker = 'o',
-            s=45
+            s=30
         )
 
         ax.axvline(
@@ -155,7 +189,6 @@ def plot(df, title)->Response:
 
         ax.set_xlabel("Time (Toronto/America)")
         ax.set_ylabel("Water Level (m)")
-
     else:
         ax = df.plot(
             kind = 'line', 
@@ -169,6 +202,21 @@ def plot(df, title)->Response:
     buf.seek(0)
     plt.close()
     return Response(content=buf.getvalue(), media_type="image/png")
+
+def getTimes(ticklabels):
+    for tickLabel in ticklabels:
+        date = tickLabel.get_text()
+        parts = re.split(r"[- ]", date)
+        hour = parts[len(parts)-1]
+
+        if hour > 12:
+            timePeriod = "PM"
+            hour = hour - 12
+        else:
+            timePeriod = "AM"
+
+    return hour + " " + timePeriod
+
 
 def test_model(model, predictors):
     predictions = model.predict(predictors)
