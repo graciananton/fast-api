@@ -75,7 +75,12 @@ def plot(df, title)->Response:
     buf = io.BytesIO()
     #+" - "+df[['stationId']].iloc[0]['stationId']
     plt.figure()
-    df.plot(x='measuredAt', y=['levelAtHour','temperature_2m','precipitation','rain'], title = title)
+    df.plot(
+        kind = 'line', 
+        x='measuredAt', 
+        y='levelAtHour', 
+        title = title
+    )
     plt.savefig(buf, format="png")
     buf.seek(0)
     plt.close()

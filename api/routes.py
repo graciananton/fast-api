@@ -69,15 +69,16 @@ def test_model(request: ModelRequest = Depends())->dict[str,float]:
 
 @router.get("/plot_test",response_class=Response)
 def plot_test(request: ModelRequest = Depends())->Response:
-    scaler = StandardScaler()
+    #scaler = StandardScaler()
     df_merged = utils.get_station_df(request.station_id,request.days)
     df_merged_past_training_set, df_merged_past_test_set = utils.get_past_training_test_df(df_merged)
     df_merged_past_test_set_copy = df_merged_past_test_set.copy()
-    numeric_cols = utils.extract_numeric_columns(df_merged_past_test_set_copy)
+    
+    #numeric_cols = utils.extract_numeric_columns(df_merged_past_test_set_copy)
 
-    print(df_merged_past_test_set_copy[numeric_cols])
+    #print(df_merged_past_test_set_copy[numeric_cols])
 
-    df_merged_past_test_set_copy[numeric_cols] = scaler.fit_transform(df_merged_past_test_set_copy[numeric_cols])
+    #df_merged_past_test_set_copy[numeric_cols] = scaler.fit_transform(df_merged_past_test_set_copy[numeric_cols])
     
     return utils.plot(df_merged_past_test_set_copy, "Past Test Set")
     #print(df_merged_past_test_set_copy)
@@ -88,7 +89,8 @@ def plot_test(request: ModelRequest = Depends())->Response:
 
 @router.get("/plot_train",response_class=Response)
 def plot_train(request: ModelRequest = Depends())->Response:
-    scaler = StandardScaler()
+    print("Plot Train")
+    #scaler = StandardScaler()
 
     df_merged = utils.get_station_df(request.station_id,request.days)
 
@@ -96,13 +98,13 @@ def plot_train(request: ModelRequest = Depends())->Response:
 
     df_merged_past_training_set, df_merged_past_test_set = utils.get_past_training_test_df(df_merged)
         
-    df_merged_past_training_set_copy = df_merged_past_training_set.copy()
+    #df_merged_past_training_set_copy = df_merged_past_training_set.copy()
 
-    numeric_cols = utils.extract_numeric_columns(df_merged_past_training_set_copy)
+    #numeric_cols = utils.extract_numeric_columns(df_merged_past_training_set_copy)
 
-    df_merged_past_training_set_copy[numeric_cols] = scaler.fit_transform(df_merged_past_training_set_copy[numeric_cols])
+    #df_merged_past_training_set_copy[numeric_cols] = scaler.fit_transform(df_merged_past_training_set_copy[numeric_cols])
 
-    return utils.plot(df_merged_past_training_set_copy, "Past Training Set")
+    return utils.plot(df_merged_past_training_set, "Past Training Set")
 
 
 @router.get("/plot_future")
