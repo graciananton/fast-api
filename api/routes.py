@@ -72,6 +72,8 @@ def plot_test(request: ModelRequest = Depends())->Response:
     #scaler = StandardScaler()
     df_merged = utils.get_station_df(request.station_id,request.days)
     df_merged_past_training_set, df_merged_past_test_set = utils.get_past_training_test_df(df_merged)
+    print(df_merged_past_test_set)
+    print(df_merged_past_training_set)
     #df_merged_past_test_set_copy = df_merged_past_test_set.copy()
 
     #numeric_cols = utils.extract_numeric_columns(df_merged_past_test_set_copy)
