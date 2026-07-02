@@ -72,16 +72,17 @@ def plot_test(request: ModelRequest = Depends())->Response:
     #scaler = StandardScaler()
     df_merged = utils.get_station_df(request.station_id,request.days)
     df_merged_past_training_set, df_merged_past_test_set = utils.get_past_training_test_df(df_merged)
-    df_merged_past_test_set_copy = df_merged_past_test_set.copy()
-    
+    #df_merged_past_test_set_copy = df_merged_past_test_set.copy()
+
     #numeric_cols = utils.extract_numeric_columns(df_merged_past_test_set_copy)
 
     #print(df_merged_past_test_set_copy[numeric_cols])
 
     #df_merged_past_test_set_copy[numeric_cols] = scaler.fit_transform(df_merged_past_test_set_copy[numeric_cols])
     
-    return utils.plot(df_merged_past_test_set_copy, "Past Test Set")
+    #return utils.plot(df_merged_past_test_set_copy, "Past Test Set")
     #print(df_merged_past_test_set_copy)
+    return utils.plot(df_merged_past_test_set, "Past Test Set")
 
 
 
