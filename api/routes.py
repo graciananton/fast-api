@@ -125,8 +125,17 @@ def future_set(request: ModelRequest = Depends()):
 
     df_merged = utils.get_station_df(request.station_id, request.days)
 
-    df_merged_future = utils.get_future_df(df_merged)
-    
+    df_merged_past, df_merged_future = utils.get_future_df(df_merged)
+    print("merged past")
+    print(df_merged_past)
+    print("merged future")
+    print(df_merged_future)
+
+    df_merged_future = pd.concat([df_merged_past[len(df_merged_past)-20:],df_merged_future])
+    print("merged past 20 and future")
+    print(df_merged_future)
+
+    #df_merged_future_with_past = (pd.concat([df_merged_past[len(df_merged_past)-1:], df_merged_future], ignore_index = True)).reset_index()
     
     df_merged_future_predictors, df_merged_future_labels = utils.extract_predictors_labels(df_merged_future)
 
@@ -135,10 +144,12 @@ def future_set(request: ModelRequest = Depends()):
 
     forest_reg = joblib.load(model_path)
 
+    # future predictions (labels)
     predictions = utils.test_model(forest_reg, df_merged_future_predictors)
 
     predictions = pd.DataFrame(predictions, columns=['levelAtHour'])
-    predictions['measuredAt'] = df_merged_future['measuredAt']
+
+    predictions['measuredAt'] = pd.concat[df_merged_past['measuredAt'][len(df_merged_past)-20:],df_merged_future['measuredAt']]
        
     df_merged_future_predictions = pd.merge(df_merged_future.drop(columns = ['levelAtHour']), predictions[['measuredAt', 'levelAtHour']], on='measuredAt', how ='left')
 
