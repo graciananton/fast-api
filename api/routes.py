@@ -121,19 +121,13 @@ def plot_future(request: ModelRequest = Depends())->Response:
 @router.get("/future_set")
 def future_set(request: ModelRequest = Depends()):
     
-    scaler = StandardScaler()
+    #scaler = StandardScaler()
 
     df_merged = utils.get_station_df(request.station_id, request.days)
 
     df_merged_past, df_merged_future = utils.get_future_df(df_merged)
-    print("merged past")
-    print(df_merged_past)
-    print("merged future")
-    print(df_merged_future)
 
     df_merged_future = pd.concat([df_merged_past[len(df_merged_past)-20:],df_merged_future])
-    print("merged past 20 and future")
-    print(df_merged_future)
 
     #df_merged_future_with_past = (pd.concat([df_merged_past[len(df_merged_past)-1:], df_merged_future], ignore_index = True)).reset_index()
     
@@ -149,7 +143,7 @@ def future_set(request: ModelRequest = Depends()):
 
     predictions = pd.DataFrame(predictions, columns=['levelAtHour'])
 
-    predictions['measuredAt'] = pd.concat[df_merged_past['measuredAt'][len(df_merged_past)-20:],df_merged_future['measuredAt']]
+    predictions['measuredAt'] = pd.concat([df_merged_past['measuredAt'][len(df_merged_past)-20:],df_merged_future['measuredAt']])
        
     df_merged_future_predictions = pd.merge(df_merged_future.drop(columns = ['levelAtHour']), predictions[['measuredAt', 'levelAtHour']], on='measuredAt', how ='left')
 
