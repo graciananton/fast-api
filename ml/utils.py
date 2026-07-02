@@ -121,18 +121,15 @@ def plot(df, title)->Response:
             label = "Measured"
         )
 
-        print("Tick Labels")
-        print(ax.get_xticklabels())
         """"
         ax.xaxis.set_major_formatter(
           mdates.DateFormatter("%H:%M")
         )
         """
+        print("Tick labels")
+        print(ax.get_xticklabels())
+        times = map(getTimes, ax.get_xticklabels())
 
-        # print("Tick labels")
-
-        times = map(getTimes, ax.get_ticklabels())
-        
         ax.set_xticklabels(times, rotation=0, ha='center')
 
         
@@ -158,11 +155,10 @@ def plot(df, title)->Response:
             label = "Predicted"
         )
 
-        ax2.xaxis.set_major_formatter(
-          mdates.DateFormatter("%H:%M")
-        )
+        
+        times = map(getTimes, ax2.get_xticklabels())
 
-        ax2.set_xticklabels(ax2.get_xticklabels(), rotation=0, ha='center')
+        ax2.set_xticklabels(times, rotation=0, ha='center')
 
         ax.scatter(
             utc_time,
@@ -203,19 +199,19 @@ def plot(df, title)->Response:
     plt.close()
     return Response(content=buf.getvalue(), media_type="image/png")
 
-def getTimes(ticklabels):
-    for tickLabel in ticklabels:
-        date = tickLabel.get_text()
-        parts = re.split(r"[- ]", date)
-        hour = parts[len(parts)-1]
+def getTimes(tickLabel):
+    date = tickLabel.get_text()
+    parts = re.split(r"[- ]", date)
 
-        if hour > 12:
-            timePeriod = "PM"
-            hour = hour - 12
-        else:
-            timePeriod = "AM"
+    hour = int(parts[len(parts)-1])
 
-    return hour + " " + timePeriod
+    if hour > 12:
+        timePeriod = "PM"
+        hour = hour - 12
+    else:
+        timePeriod = "AM"
+
+    return str(hour) + " " + timePeriod
 
 
 def test_model(model, predictors):
