@@ -84,7 +84,7 @@ def plot(df, title)->Response:
         microsecond=0
     )
 
-    utc_time_text = utc_time - timedelta(minutes=30)
+    utc_time_text = utc_time - timedelta(minutes=160)
 
     utc_time_border = utc_time - timedelta(minutes = 60)
 
@@ -110,22 +110,9 @@ def plot(df, title)->Response:
             kind = 'line', 
             x='measuredAt', 
             y='levelAtHour', 
-            title = title,
-            color='#0057E7',
-            label = "Measured"
+            color='#0057E7'
         )
-
-        """"
-        print(ax.get_xticklabels())
-        timesBefore = map(getTimes, ax.get_xticklabels())
-        print(list(timesBefore))
-
-        positions = ax.get_xticks()
-
-        ax.set_xticks(positions)
-
-        ax.set_xticklabels(timesBefore, rotation=0, ha='center')
-        """
+        ax.get_legend().remove()
 
         ax.spines["top"].set_linewidth(0)
 
@@ -141,11 +128,9 @@ def plot(df, title)->Response:
             kind = 'line', 
             x='measuredAt', 
             y='levelAtHour', 
-            title = title,
             color='#0057E7',
             linestyle="--", 
-            ax = ax,
-            label = "Predicted"
+            ax = ax
         )
 
         timesAfter = map(getTimes, ax2.get_xticklabels())
@@ -174,7 +159,7 @@ def plot(df, title)->Response:
 
         ax.text(
             x = utc_time_text,
-            y= level,
+            y= level+0.0001,
             s = round(level.iloc[0],2), # get 0th indexed value from series pandas
             fontsize=10,
             color="#0057E7"
@@ -182,6 +167,8 @@ def plot(df, title)->Response:
 
         ax.set_xlabel("Time (Toronto/America)")
         ax.set_ylabel("Water Level (m)")
+        ax2.get_legend().remove()
+
     else:
         ax = df.plot(
             kind = 'line', 
