@@ -120,40 +120,44 @@ def plot_future(request: ModelRequest = Depends())->Response:
 
 @router.get("/future_set")
 def future_set(request: ModelRequest = Depends()):
-    
-    #scaler = StandardScaler()
-
     df_merged = utils.get_station_df(request.station_id, request.days)
 
     df_merged_past, df_merged_future = utils.get_future_df(df_merged)
 
-    df_merged_future = pd.concat([df_merged_past[len(df_merged_past)-20:],df_merged_future])
+    df_merged_future = pd.concat(
+        [
+            df_merged_past.iloc[-20:],
+            df_merged_future
+        ],
+        ignore_index=True
+    )
 
-    #df_merged_future_with_past = (pd.concat([df_merged_past[len(df_merged_past)-1:], df_merged_future], ignore_index = True)).reset_index()
-    
     df_merged_future_predictors, df_merged_future_labels = utils.extract_predictors_labels(df_merged_future)
 
     model_path = f"models/forest_reg_{request.station_id}.pkl"
-    
-
     forest_reg = joblib.load(model_path)
 
-    # future predictions (labels)
     predictions = utils.test_model(forest_reg, df_merged_future_predictors)
 
-    predictions = pd.DataFrame(predictions, columns=['levelAtHour'])
+    predictions = pd.DataFrame(
+        predictions,
+        columns=["levelAtHour"]
+    ).reset_index(drop=True)
 
-    predictions['measuredAt'] = pd.concat([df_merged_past['measuredAt'][len(df_merged_past)-20:],df_merged_future['measuredAt']])
-       
-    df_merged_future_predictions = pd.merge(df_merged_future.drop(columns = ['levelAtHour']), predictions[['measuredAt', 'levelAtHour']], on='measuredAt', how ='left')
+    predictions["measuredAt"] = (
+        df_merged_future["measuredAt"]
+        .reset_index(drop=True)
+    )
 
-    #df_merged_future_predictions_copy = df_merged_future_predictions.copy()
-    #numeric_cols = utils.extract_numeric_columns(df_merged_future_predictions_copy)
+    df_merged_future_predictions = (
+        df_merged_future
+            .drop(columns=["levelAtHour"])
+            .merge(
+                predictions,
+                on="measuredAt",
+                how="left"
+            )
+    )
 
-    #df_merged_future_predictions_copy[numeric_cols] = scaler.fit_transform(df_merged_future_predictions_copy[numeric_cols])
-    
-    #df_merged_future_predictions_copy[numeric_cols] = df_merged_future_predictions_copy[numeric_cols]
-
-    return (df_merged_future_predictions).to_dict(orient='records')
-
+    return df_merged_future_predictions.to_dict(orient="records")
 
