@@ -79,7 +79,8 @@ def plot(df, title)->Response:
         kind = 'line', 
         x='measuredAt', 
         y='levelAtHour', 
-        title = title
+        title = title,
+        color='#0057E7'
     )
     plt.savefig(buf, format="png")
     buf.seek(0)

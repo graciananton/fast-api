@@ -66,7 +66,6 @@ def test_model(request: ModelRequest = Depends())->dict[str,float]:
     return {"RMSE": forest_reg_rmse}
 
 
-
 @router.get("/plot_test",response_class=Response)
 def plot_test(request: ModelRequest = Depends())->Response:
     #scaler = StandardScaler()
@@ -74,6 +73,8 @@ def plot_test(request: ModelRequest = Depends())->Response:
     df_merged_past_training_set, df_merged_past_test_set = utils.get_past_training_test_df(df_merged)
     print(df_merged_past_test_set)
     print(df_merged_past_training_set)
+
+    
     #df_merged_past_test_set_copy = df_merged_past_test_set.copy()
 
     #numeric_cols = utils.extract_numeric_columns(df_merged_past_test_set_copy)
@@ -113,6 +114,8 @@ def plot_train(request: ModelRequest = Depends())->Response:
 @router.get("/plot_future")
 def plot_future(request: ModelRequest = Depends())->Response:
     df_merged_future_predictions_copy = pd.DataFrame(future_set(request))
+    print(df_merged_future_predictions_copy)
+
     return utils.plot(df_merged_future_predictions_copy, "Future Predictions")
 
 @router.get("/future_set")
@@ -139,13 +142,13 @@ def future_set(request: ModelRequest = Depends()):
        
     df_merged_future_predictions = pd.merge(df_merged_future.drop(columns = ['levelAtHour']), predictions[['measuredAt', 'levelAtHour']], on='measuredAt', how ='left')
 
-    df_merged_future_predictions_copy = df_merged_future_predictions.copy()
-    numeric_cols = utils.extract_numeric_columns(df_merged_future_predictions_copy)
+    #df_merged_future_predictions_copy = df_merged_future_predictions.copy()
+    #numeric_cols = utils.extract_numeric_columns(df_merged_future_predictions_copy)
 
     #df_merged_future_predictions_copy[numeric_cols] = scaler.fit_transform(df_merged_future_predictions_copy[numeric_cols])
     
     #df_merged_future_predictions_copy[numeric_cols] = df_merged_future_predictions_copy[numeric_cols]
 
-    return (df_merged_future_predictions_copy).to_dict(orient='records')
+    return (df_merged_future_predictions).to_dict(orient='records')
 
 
