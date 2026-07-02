@@ -104,12 +104,6 @@ def plot(df, title)->Response:
 
         after = df[df['measuredAt'] > utc_time_border]
 
-        print("Before: ")
-        print(before)
-
-        print("After: ")
-        print(after)
-
         level = df[df['measuredAt'] == utc_time]['levelAtHour']
         
         ax = before.plot(
@@ -121,17 +115,18 @@ def plot(df, title)->Response:
             label = "Measured"
         )
 
-        times = map(getTimes, ax.get_xticklabels())
+        """"
+        print(ax.get_xticklabels())
+        timesBefore = map(getTimes, ax.get_xticklabels())
+        print(list(timesBefore))
 
-        for i in range(len(ax.get_xticklabels())):
-            times.append(getTimes(ax.get_xticklabels()[i]))
-            
         positions = ax.get_xticks()
 
         ax.set_xticks(positions)
 
-        ax.set_xticklabels(times, rotation=0, ha='center')
-        
+        ax.set_xticklabels(timesBefore, rotation=0, ha='center')
+        """
+
         ax.spines["top"].set_linewidth(0)
 
         ax.spines["bottom"].set_color("gray")
@@ -141,7 +136,6 @@ def plot(df, title)->Response:
         ax.spines["left"].set_linewidth(1)
 
         ax.spines["right"].set_linewidth(0)
-        
         
         ax2 = after.plot(
             kind = 'line', 
@@ -154,14 +148,13 @@ def plot(df, title)->Response:
             label = "Predicted"
         )
 
-        
-        times = map(getTimes, ax2.get_xticklabels())
+        timesAfter = map(getTimes, ax2.get_xticklabels())
 
         positions = ax2.get_xticks()
     
         ax2.set_xticks(positions)
 
-        ax2.set_xticklabels(times, rotation=0, ha='center')
+        ax2.set_xticklabels(timesAfter, rotation=0, ha='center')
 
 
         ax.scatter(
@@ -208,7 +201,7 @@ def getTimes(tickLabel):
     parts = re.split(r"[- ]", date)
 
     hour = parts[len(parts)-1]
-
+    print("Hour " + hour)
     hour = int(hour)
     if hour >= 12:
         timePeriod = "PM"
