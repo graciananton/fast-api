@@ -11,6 +11,7 @@ from fastapi.responses import FileResponse
 import io
 from sklearn.metrics import mean_squared_error
 import numpy as np
+from datetime import datetime, UTC
 
 load_dotenv() 
 
@@ -75,13 +76,91 @@ def plot(df, title)->Response:
     buf = io.BytesIO()
     #+" - "+df[['stationId']].iloc[0]['stationId']
     plt.figure()
-    df.plot(
-        kind = 'line', 
-        x='measuredAt', 
-        y='levelAtHour', 
-        title = title,
-        color='#0057E7'
+    utc_time = datetime.now(UTC).replace(
+        minute=0,
+        second=0,
+        microsecond=0
     )
+
+    utc_time_text = utc_time - timedelta(minutes=30)
+
+    utc_time_border = utc_time - timedelta(minutes = 60)
+
+    utc_time_text.isoformat()
+
+    utc_time.isoformat()
+
+    utc_time_border.isoformat()
+
+    utc_time = pd.to_datetime(utc_time)
+    utc_time_text = pd.to_datetime(utc_time_text)
+    utc_time_border = pd.to_datetime(utc_time_border)
+
+    if title == "Future Predictions":
+
+        before = df[df['measuredAt'] <= utc_time]
+
+        after = df[df['measuredAt'] > utc_time_border]
+
+        print("Before: ")
+        print(before)
+
+        print("After: ")
+        print(after)
+
+        level = df[df['measuredAt'] == utc_time]['levelAtHour']
+        
+        ax = before.plot(
+            kind = 'line', 
+            x='measuredAt', 
+            y='levelAtHour', 
+            title = title,
+            color='#0057E7',
+            label = "Measured"
+        )
+
+        after.plot(
+            kind = 'line', 
+            x='measuredAt', 
+            y='levelAtHour', 
+            title = title,
+            color='#0057E7',
+            linestyle="--", 
+            ax = ax,
+            label = "Predicted"
+        )
+
+        ax.scatter(
+            utc_time,
+            level,
+            color = 'red',
+            marker = 'o',
+            s=45
+        )
+
+        ax.axvline(
+            x = utc_time,
+            color = 'gray',
+            linewidth = 1,
+            linestyle = "--"
+        )
+
+        ax.text(
+            x = utc_time_text,
+            y= level,
+            s = round(level.iloc[0],2), # get 0th indexed value from series pandas
+            fontsize=10,
+            color="#0057E7"
+        )
+    else:
+        ax = df.plot(
+            kind = 'line', 
+            x='measuredAt', 
+            y='levelAtHour', 
+            title = title,
+            color='#0057E7'
+        )
+
     plt.savefig(buf, format="png")
     buf.seek(0)
     plt.close()

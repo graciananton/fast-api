@@ -114,7 +114,6 @@ def plot_train(request: ModelRequest = Depends())->Response:
 @router.get("/plot_future")
 def plot_future(request: ModelRequest = Depends())->Response:
     df_merged_future_predictions_copy = pd.DataFrame(future_set(request))
-    print(df_merged_future_predictions_copy)
 
     return utils.plot(df_merged_future_predictions_copy, "Future Predictions")
 
@@ -126,7 +125,7 @@ def future_set(request: ModelRequest = Depends()):
 
     df_merged_future = pd.concat(
         [
-            df_merged_past.iloc[-20:],
+            df_merged_past.iloc[-30:],
             df_merged_future
         ],
         ignore_index=True
