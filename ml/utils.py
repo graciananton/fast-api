@@ -121,17 +121,16 @@ def plot(df, title)->Response:
             label = "Measured"
         )
 
-        """"
-        ax.xaxis.set_major_formatter(
-          mdates.DateFormatter("%H:%M")
-        )
-        """
-        print("Tick labels")
-        print(ax.get_xticklabels())
         times = map(getTimes, ax.get_xticklabels())
 
-        ax.set_xticklabels(times, rotation=0, ha='center')
+        for i in range(len(ax.get_xticklabels())):
+            times.append(getTimes(ax.get_xticklabels()[i]))
+            
+        positions = ax.get_xticks()
 
+        ax.set_xticks(positions)
+
+        ax.set_xticklabels(times, rotation=0, ha='center')
         
         ax.spines["top"].set_linewidth(0)
 
@@ -158,7 +157,12 @@ def plot(df, title)->Response:
         
         times = map(getTimes, ax2.get_xticklabels())
 
+        positions = ax2.get_xticks()
+    
+        ax2.set_xticks(positions)
+
         ax2.set_xticklabels(times, rotation=0, ha='center')
+
 
         ax.scatter(
             utc_time,
@@ -203,9 +207,10 @@ def getTimes(tickLabel):
     date = tickLabel.get_text()
     parts = re.split(r"[- ]", date)
 
-    hour = int(parts[len(parts)-1])
+    hour = parts[len(parts)-1]
 
-    if hour > 12:
+    hour = int(hour)
+    if hour >= 12:
         timePeriod = "PM"
         hour = hour - 12
     else:
