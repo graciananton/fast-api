@@ -13,6 +13,7 @@ from sklearn.metrics import mean_squared_error
 import numpy as np
 from datetime import datetime, UTC
 import matplotlib.dates as mdates
+from zoneinfo import ZoneInfo
 import re
 
 load_dotenv() 
@@ -133,6 +134,9 @@ def plot(df, title)->Response:
             ax = ax
         )
 
+        print("Tick labels")
+        print(ax2.get_xticklabels())
+
         timesAfter = map(getTimes, ax2.get_xticklabels())
 
         positions = ax2.get_xticks()
@@ -184,19 +188,12 @@ def plot(df, title)->Response:
     return Response(content=buf.getvalue(), media_type="image/png")
 
 def getTimes(tickLabel):
-    date = tickLabel.get_text()
-    parts = re.split(r"[- ]", date)
+    x = tickLabel.get_position()[0]
 
-    hour = parts[len(parts)-1]
-    print("Hour " + hour)
-    hour = int(hour)
-    if hour >= 12:
-        timePeriod = "PM"
-        hour = hour - 12
-    else:
-        timePeriod = "AM"
-
-    return str(hour) + " " + timePeriod
+    dt = mdates.num2date(x, tz=ZoneInfo("America/Toronto"))
+    hour = dt.hour
+    
+    return dt.hour + " " + "PM" if hour >= 12 else "AM"
 
 
 def test_model(model, predictors):
