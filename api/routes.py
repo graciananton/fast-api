@@ -8,6 +8,7 @@ import joblib
 from pydantic import BaseModel
 from typing import Optional
 from fastapi import Depends
+import requests
 import os
 
 class ModelRequest(BaseModel):
@@ -64,6 +65,31 @@ def test_model(request: ModelRequest = Depends())->dict[str,float]:
     forest_reg_rmse = utils.get_forest_rmse(forest_reg, df_merged_past_test_set_predictors, df_merged_past_test_set_labels)
     print("Return RMSE result")
     return {"RMSE": forest_reg_rmse}
+
+@router.get("/distribution")
+def get_distribution(request: ModelRequest = Depends()):
+    try:
+        response = requests.get(f"https://api.weather.gc.ca/collections/hydrometric-daily-mean/items?STATION_NUMBER={request.station_id}&f=json&limit=10000&filter=properties.LEVEL IS NOT NULL")
+        response.raise_for_status()
+        # response.status_code is 200 at this point
+        response = response.json()
+        rows = response['features']
+        levels = []
+        for row in rows:
+            levels.append(row['properties']['LEVEL'])
+        
+            
+        return response
+    except requests.exceptions.Timeout:
+        print("Request timeout")
+    except requests.exceptions.RequestException as e:
+        print("Request failed: ", e)
+    except Exception as e:
+        print("Failed: ",e)
+    
+    
+
+    
 
 
 @router.get("/plot_test",response_class=Response)
