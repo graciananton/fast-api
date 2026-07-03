@@ -193,7 +193,9 @@ def getTimes(tickLabel):
     dt = mdates.num2date(x, tz=ZoneInfo("America/Toronto"))
     hour = dt.hour
     
-    return dt.hour + " " + "PM" if hour >= 12 else "AM"
+    print("Hour:")
+    print(hour)
+    return str(hour) + " " + "PM" if hour >= 12 else "AM"
 
 
 def test_model(model, predictors):
