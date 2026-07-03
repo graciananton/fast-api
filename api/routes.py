@@ -69,9 +69,11 @@ def test_model(request: ModelRequest = Depends())->dict[str,float]:
     print("Return RMSE result")
     return {"RMSE": forest_reg_rmse}
 
-@router.get("/distribution")
-def get_distribution(request: ModelRequest = Depends()):
+@router.get("/levelAnalysis")
+def level_analysis(request: ModelRequest = Depends()):
+    """
     try:
+        
         response = requests.get(f"https://api.weather.gc.ca/collections/hydrometric-daily-mean/items?STATION_NUMBER={request.station_id}&f=json&limit=10000&filter=properties.LEVEL IS NOT NULL")
 
         response.raise_for_status()
@@ -84,14 +86,15 @@ def get_distribution(request: ModelRequest = Depends()):
 
         for row in rows:
             print(row)
-            levels.append(row['properties']['LEVEL'])
-
-        levels.sort()
+            levels.append({
+                "level": row['properties']['LEVEL'],
+                "date": row['properties']['DATE']
+            })
 
         print(json.dumps(levels))
 
         return json.dumps(levels)
-        """"
+        
         percentiles = np.linspace(0, 100, len(levels))
 
 
@@ -99,14 +102,14 @@ def get_distribution(request: ModelRequest = Depends()):
                              #   x  ,   xp  ,     fp 
                              # trying to predict the percentile using the levels given the level
         return percentile
-        """
     except requests.exceptions.Timeout:
         print("Request timeout")
     except requests.exceptions.RequestException as e:
         print("Request failed: ", e)
     except Exception as e:
         print("Failed: ",e)
-    
+    """
+
     
 
     
