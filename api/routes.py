@@ -85,7 +85,7 @@ def plot_test(request: ModelRequest = Depends())->Response:
     
     #return utils.plot(df_merged_past_test_set_copy, "Past Test Set")
     #print(df_merged_past_test_set_copy)
-    return utils.plot(df_merged_past_test_set, "Past Test Set")
+    return utils.plot(df_merged_past_test_set)
 
 
 
@@ -108,14 +108,14 @@ def plot_train(request: ModelRequest = Depends())->Response:
 
     #df_merged_past_training_set_copy[numeric_cols] = scaler.fit_transform(df_merged_past_training_set_copy[numeric_cols])
 
-    return utils.plot(df_merged_past_training_set, "Past Training Set")
+    return utils.plot(df_merged_past_training_set)
 
 
 @router.get("/plot_future")
 def plot_future(request: ModelRequest = Depends())->Response:
     df_merged_future_predictions_copy = pd.DataFrame(future_set(request))
 
-    return utils.plot(df_merged_future_predictions_copy, "Future Predictions")
+    return utils.plot(df_merged_future_predictions_copy, 'future')
 
 @router.get("/future_set")
 def future_set(request: ModelRequest = Depends()):

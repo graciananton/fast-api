@@ -75,7 +75,7 @@ def extract_numeric_columns(df):
     numeric_cols = df.select_dtypes(include=['number']).columns
     return numeric_cols
 
-def plot(df, title)->Response:
+def plot(df, category = "past")->Response:
     buf = io.BytesIO()
     #+" - "+df[['stationId']].iloc[0]['stationId']
     plt.figure()
@@ -85,7 +85,7 @@ def plot(df, title)->Response:
         microsecond=0
     )
 
-    utc_time_text = utc_time - timedelta(minutes=160)
+    utc_time_text = utc_time + timedelta(minutes=45)
 
     utc_time_border = utc_time - timedelta(minutes = 60)
 
@@ -99,7 +99,7 @@ def plot(df, title)->Response:
     utc_time_text = pd.to_datetime(utc_time_text)
     utc_time_border = pd.to_datetime(utc_time_border)
 
-    if title == "Future Predictions":
+    if category == "future":
 
         before = df[df['measuredAt'] <= utc_time]
 
@@ -164,9 +164,10 @@ def plot(df, title)->Response:
         ax.text(
             x = utc_time_text,
             y= level+0.0001,
-            s = round(level.iloc[0],2), # get 0th indexed value from series pandas
+            s = str(round(level.iloc[0],2)) + "m", # get 0th indexed value from series pandas
             fontsize=10,
-            color="#0057E7"
+            color="gray",
+            fontweight = 'bold'
         )
 
         ax.set_xlabel("Time (Toronto/America)")
@@ -178,7 +179,6 @@ def plot(df, title)->Response:
             kind = 'line', 
             x='measuredAt', 
             y='levelAtHour', 
-            title = title,
             color='#0057E7'
         )
 
@@ -192,10 +192,10 @@ def getTimes(tickLabel):
 
     dt = mdates.num2date(x, tz=ZoneInfo("America/Toronto"))
     hour = dt.hour
-    
+
     print("Hour:")
     print(hour)
-    return str(hour) + " " + "PM" if hour >= 12 else "AM"
+    return (str(int(hour) - 12) + " PM") if hour >= 12 else str(hour) + " AM"
 
 
 def test_model(model, predictors):
