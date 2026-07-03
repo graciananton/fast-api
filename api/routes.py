@@ -11,11 +11,12 @@ from fastapi import Depends
 import requests
 import os
 import numpy as np
+import json
 
 class ModelRequest(BaseModel):
     station_id: str
     days: Optional[int] = 50
-    level: Optional[int] = 3.0
+    level: Optional[float] = 3.0
 
 router = APIRouter()
 
@@ -72,24 +73,33 @@ def test_model(request: ModelRequest = Depends())->dict[str,float]:
 def get_distribution(request: ModelRequest = Depends()):
     try:
         response = requests.get(f"https://api.weather.gc.ca/collections/hydrometric-daily-mean/items?STATION_NUMBER={request.station_id}&f=json&limit=10000&filter=properties.LEVEL IS NOT NULL")
+
         response.raise_for_status()
         # response.status_code is 200 at this point
         response = response.json()
-
-        level = response.level
+    
+        level = request.level
         rows = response['features']
         levels = []
+
         for row in rows:
+            print(row)
             levels.append(row['properties']['LEVEL'])
 
         levels.sort()
 
-        percentiles = list(range(0, 100, 5))
+        print(json.dumps(levels))
+
+        return json.dumps(levels)
+        """"
+        percentiles = np.linspace(0, 100, len(levels))
+
 
         percentile = np.interp(level, levels, percentiles)
-        
+                             #   x  ,   xp  ,     fp 
+                             # trying to predict the percentile using the levels given the level
         return percentile
-    
+        """
     except requests.exceptions.Timeout:
         print("Request timeout")
     except requests.exceptions.RequestException as e:
