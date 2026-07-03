@@ -79,33 +79,34 @@ def plot(df, category = "past")->Response:
     buf = io.BytesIO()
     #+" - "+df[['stationId']].iloc[0]['stationId']
     plt.figure()
-    utc_time = datetime.now(UTC).replace(
-        minute=0,
-        second=0,
-        microsecond=0
-    )
-
-    utc_time_text = utc_time + timedelta(minutes=45)
-
-    utc_time_border = utc_time - timedelta(minutes = 60)
-
-    utc_time_text.isoformat()
-
-    utc_time.isoformat()
-
-    utc_time_border.isoformat()
-
-    utc_time = pd.to_datetime(utc_time)
-    utc_time_text = pd.to_datetime(utc_time_text)
-    utc_time_border = pd.to_datetime(utc_time_border)
 
     if category == "future":
+        utc_time = datetime.now(UTC).replace(
+            minute=0,
+            second=0,
+            microsecond=0
+        )
+
+        utc_time_text = utc_time + timedelta(minutes=45)
+
+        utc_time_border = utc_time - timedelta(minutes = 60)
+
+        utc_time_text.isoformat()
+
+        utc_time.isoformat()
+
+        utc_time_border.isoformat()
+
+        utc_time = pd.to_datetime(utc_time)
+        utc_time_text = pd.to_datetime(utc_time_text)
+        utc_time_border = pd.to_datetime(utc_time_border)
 
         before = df[df['measuredAt'] <= utc_time]
 
         after = df[df['measuredAt'] > utc_time_border]
 
-        level = df[df['measuredAt'] == utc_time]['levelAtHour']
+        level = df.loc[df['measuredAt'] == utc_time, 'levelAtHour'].iloc[0]
+        
         
         ax = before.plot(
             kind = 'line', 
@@ -163,8 +164,8 @@ def plot(df, category = "past")->Response:
 
         ax.text(
             x = utc_time_text,
-            y= level+0.0001,
-            s = str(round(level.iloc[0],2)) + "m", # get 0th indexed value from series pandas
+            y = level + 0.0001,
+            s = str(round(level,2)) + "m", # get 0th indexed value from series pandas
             fontsize=10,
             color="gray",
             fontweight = 'bold'
