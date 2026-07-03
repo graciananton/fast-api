@@ -10,10 +10,12 @@ from typing import Optional
 from fastapi import Depends
 import requests
 import os
+import numpy as np
 
 class ModelRequest(BaseModel):
     station_id: str
     days: Optional[int] = 50
+    level: Optional[int] = 3.0
 
 router = APIRouter()
 
@@ -73,13 +75,21 @@ def get_distribution(request: ModelRequest = Depends()):
         response.raise_for_status()
         # response.status_code is 200 at this point
         response = response.json()
+
+        level = response.level
         rows = response['features']
         levels = []
         for row in rows:
             levels.append(row['properties']['LEVEL'])
+
+        levels.sort()
+
+        percentiles = list(range(0, 100, 5))
+
+        percentile = np.interp(level, levels, percentiles)
         
-            
-        return response
+        return percentile
+    
     except requests.exceptions.Timeout:
         print("Request timeout")
     except requests.exceptions.RequestException as e:
