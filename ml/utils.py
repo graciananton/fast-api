@@ -183,6 +183,25 @@ def plot(df, category = "past")->Response:
             color='#0057E7'
         )
 
+        ax.spines["top"].set_linewidth(0)
+
+        ax.spines["bottom"].set_color("gray")
+        ax.spines["bottom"].set_linewidth(1)
+
+        ax.spines["left"].set_color("gray")
+        ax.spines["left"].set_linewidth(1)
+
+        ax.spines["right"].set_linewidth(0)
+
+        #timesAfter = map(getTimes, ax.get_xticklabels())
+
+        #positions = ax.get_xticks()
+    
+        #ax.set_xticks(positions)
+
+        ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha='center')
+
+
     plt.savefig(buf, format="png")
     buf.seek(0)
     plt.close()
