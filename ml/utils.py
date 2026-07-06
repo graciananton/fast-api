@@ -224,7 +224,18 @@ def test_model(model, predictors):
 
 def get_future_df(df_merged):
     df_merged_past, df_merged_future = split_past_future(df_merged)
+    
+    print("df merged future")
+    print(df_merged_future)
     return add_index(df_merged_past), add_index(df_merged_future)
+
+
+def split_past_future(df):
+    df_merged_past = df.iloc[:df['levelAtHour'].isna().idxmax() - 1]
+
+    df_merged_future = df.iloc[df['levelAtHour'].isna().idxmax():len(df)]
+    return df_merged_past, df_merged_future
+
 
 def get_forest_rmse(forest_reg, predictors, labels):
     predictions = test_model(forest_reg, predictors)
@@ -242,12 +253,6 @@ def get_past_training_test_df(df):
     return df_merged_past_training_set, df_merged_past_test_set
 
 
-def split_past_future(df):
-
-    df_merged_past = df.loc[:df['levelAtHour'].isna().idxmax() - 1]
-
-    df_merged_future = df.loc[df['levelAtHour'].isna().idxmax():len(df)]
-    return df_merged_past, df_merged_future
 
 def split_train_test_by_id(df_merged, test_ratio, id_column):
     ids = df_merged[id_column]

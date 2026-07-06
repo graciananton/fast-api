@@ -187,10 +187,10 @@ def future_set(request: ModelRequest = Depends()):
 
     df_merged_future = utils.get_future_df(df_merged)
 
+
     df_merged_future_predictors, df_merged_future_labels = utils.extract_predictors_labels(df_merged_future)
 
     model_path = f"models/forest_reg_{request.station_id}.pkl"
-    
 
     forest_reg = joblib.load(model_path)
 
