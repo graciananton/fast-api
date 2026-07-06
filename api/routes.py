@@ -84,7 +84,6 @@ def level_analysis(request: ModelRequest = Depends()):
 
     
 
-
 @router.get("/plot_test",response_class=Response)
 def plot_test(request: ModelRequest = Depends())->Response:
     #scaler = StandardScaler()
