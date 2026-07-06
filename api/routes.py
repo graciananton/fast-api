@@ -75,8 +75,19 @@ def test_model(request: ModelRequest = Depends())->dict[str,float]:
 @router.get("/levelAnalysis")
 def level_analysis(request: ModelRequest = Depends()):
    station_id = request.station_id
-   response = f"http://gracian.ca/laravel/public/api/levels?stationId={station_id}"
-   response = response.json()
+
+   try:
+        response = requests.get(f"http://gracian.ca/laravel/public/api/levels?stationId={station_id}")
+        response.raise_for_status()
+
+        data = response.json()
+
+        if len(data) < 1:
+            raise "Data length is < 1"
+        
+   except Exception as err:
+       print(err)
+   
 
    return response
 
