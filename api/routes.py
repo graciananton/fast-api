@@ -18,7 +18,7 @@ class ModelRequest(BaseModel):
     station_id: str
     days: Optional[int] = 50
     level: Optional[float] = 3.0
-    time: Optional[datetime]
+    time: Optional[datetime] = datetime.now()
 
 router = APIRouter()
 
