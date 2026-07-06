@@ -83,7 +83,7 @@ def level_analysis(request: ModelRequest = Depends()):
         data = response.json()
 
         if len(data) < 1:
-            raise "Data length is < 1"
+            raise ValueError("Data length is < 1")
         
    except Exception as err:
        print(err)
