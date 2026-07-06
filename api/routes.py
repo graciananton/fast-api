@@ -85,6 +85,13 @@ def level_analysis(request: ModelRequest = Depends()):
         if len(data) < 1:
             raise ValueError("Data length is < 1")
         
+        dt = datetime.fromisoformat(request.time)
+
+        month = dt.month
+        day = dt.day
+
+        
+        
    except Exception as err:
        print(err)
    
