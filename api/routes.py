@@ -71,16 +71,14 @@ def test_model(request: ModelRequest = Depends())->dict[str,float]:
     print("Return RMSE result")
     return {"RMSE": forest_reg_rmse}
 
-""""
+
 @router.get("/levelAnalysis")
 def level_analysis(request: ModelRequest = Depends()):
-   date = datetime.fromisoformat(request.time.replace("Z", "+00:00")) # converts iso8601 String to datetime object (Date())
    station_id = request.station_id
-   level = request.level
-   response = f"http://gracian.ca/laravel/public/api/levels?stationId={station_id}&time={date}&level={level}"
+   response = f"http://gracian.ca/laravel/public/api/levels?stationId={station_id}"
    response = response.json()
+
    return response
-"""
 
     
 
@@ -185,11 +183,13 @@ def future_set(request: ModelRequest = Depends()):
 
     df_merged = utils.get_station_df(request.station_id, request.days)
 
+    print(df_merged)
+
     df_merged_past, df_merged_future = utils.get_future_df(df_merged)
 
     print(df_merged_future)
     print(type(df_merged_future))
-    
+
     df_merged_future_predictors, df_merged_future_labels = utils.extract_predictors_labels(df_merged_future)
 
     model_path = f"models/forest_reg_{request.station_id}.pkl"
@@ -203,11 +203,13 @@ def future_set(request: ModelRequest = Depends()):
        
     df_merged_future_predictions = pd.merge(df_merged_future.drop(columns = ['levelAtHour']), predictions[['measuredAt', 'levelAtHour']], on='measuredAt', how ='left')
 
-    df_merged_future_predictions_copy = df_merged_future_predictions.copy()
-    numeric_cols = utils.extract_numeric_columns(df_merged_future_predictions_copy)
+    #df_merged_future_predictions_copy = df_merged_future_predictions.copy()
+    #numeric_cols = utils.extract_numeric_columns(df_merged_future_predictions_copy)
 
     #df_merged_future_predictions_copy[numeric_cols] = scaler.fit_transform(df_merged_future_predictions_copy[numeric_cols])
     
     #df_merged_future_predictions_copy[numeric_cols] = df_merged_future_predictions_copy[numeric_cols]
 
-    return (df_merged_future_predictions_copy).to_dict(orient='records')
+    print(df_merged_future_predictions)
+
+    return (df_merged_future_predictions).to_dict(orient='records')

@@ -61,7 +61,7 @@ def get_station_df(station_id:str, days:int):
         [weather_df[['measuredAt']], weather_expanded],
         axis=1
     )
-
+    
     df_merged = create_merged_df(weather_expanded_df, readings_df)
 
     return df_merged
@@ -228,7 +228,7 @@ def get_future_df(df_merged):
     print("df merged future")
     print(df_merged_future)
     print(type(df_merged_future))
-    
+
     return add_index(df_merged_past), add_index(df_merged_future)
 
 
