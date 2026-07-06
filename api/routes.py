@@ -12,11 +12,13 @@ import requests
 import os
 import numpy as np
 import json
+from datetime import datetime
 
 class ModelRequest(BaseModel):
     station_id: str
     days: Optional[int] = 50
     level: Optional[float] = 3.0
+    time: Optional[datetime]
 
 router = APIRouter()
 
@@ -71,46 +73,13 @@ def test_model(request: ModelRequest = Depends())->dict[str,float]:
 
 @router.get("/levelAnalysis")
 def level_analysis(request: ModelRequest = Depends()):
-    """
-    try:
-        
-        response = requests.get(f"https://api.weather.gc.ca/collections/hydrometric-daily-mean/items?STATION_NUMBER={request.station_id}&f=json&limit=10000&filter=properties.LEVEL IS NOT NULL")
-
-        response.raise_for_status()
-        # response.status_code is 200 at this point
-        response = response.json()
-    
-        level = request.level
-        rows = response['features']
-        levels = []
-
-        for row in rows:
-            print(row)
-            levels.append({
-                "level": row['properties']['LEVEL'],
-                "date": row['properties']['DATE']
-            })
-
-        print(json.dumps(levels))
-
-        return json.dumps(levels)
-        
-        percentiles = np.linspace(0, 100, len(levels))
-
-
-        percentile = np.interp(level, levels, percentiles)
-                             #   x  ,   xp  ,     fp 
-                             # trying to predict the percentile using the levels given the level
-        return percentile
-    except requests.exceptions.Timeout:
-        print("Request timeout")
-    except requests.exceptions.RequestException as e:
-        print("Request failed: ", e)
-    except Exception as e:
-        print("Failed: ",e)
-    """
-
-    
+   date = datetime.fromisoformat(request.time.replace("Z", "+00:00")) # converts iso8601 String to datetime object (Date())
+   station_id = request.station_id
+   level = request.level
+   response = f"http://gracian.ca/laravel/public/api/levels?stationId={station_id}&time={date}&level={level}"
+   response = response.json()
+   return response
+   
 
     
 
@@ -162,12 +131,12 @@ def plot_train(request: ModelRequest = Depends())->Response:
 
 @router.get("/plot_future")
 def plot_future(request: ModelRequest = Depends())->Response:
-    df_merged_future_predictions_copy = pd.DataFrame(future_set(request))
+    df_merged_future_predictions_copy = pd.DataFrame(plotted_future_set(request))
 
     return utils.plot(df_merged_future_predictions_copy, 'future')
 
-@router.get("/future_set")
-def future_set(request: ModelRequest = Depends()):
+#@router.get("/future_set")
+def plotted_future_set(request: ModelRequest = Depends()):
     df_merged = utils.get_station_df(request.station_id, request.days)
 
     df_merged_past, df_merged_future = utils.get_future_df(df_merged)
@@ -209,3 +178,34 @@ def future_set(request: ModelRequest = Depends()):
 
     return df_merged_future_predictions.to_dict(orient="records")
 
+@router.get("/future_set")
+def future_set(request: ModelRequest = Depends()):
+    
+    scaler = StandardScaler()
+
+    df_merged = utils.get_station_df(request.station_id, request.days)
+
+    df_merged_future = utils.get_future_df(df_merged)
+
+    df_merged_future_predictors, df_merged_future_labels = utils.extract_predictors_labels(df_merged_future)
+
+    model_path = f"models/forest_reg_{request.station_id}.pkl"
+    
+
+    forest_reg = joblib.load(model_path)
+
+    predictions = utils.test_model(forest_reg, df_merged_future_predictors)
+
+    predictions = pd.DataFrame(predictions, columns=['levelAtHour'])
+    predictions['measuredAt'] = df_merged_future['measuredAt']
+       
+    df_merged_future_predictions = pd.merge(df_merged_future.drop(columns = ['levelAtHour']), predictions[['measuredAt', 'levelAtHour']], on='measuredAt', how ='left')
+
+    df_merged_future_predictions_copy = df_merged_future_predictions.copy()
+    numeric_cols = utils.extract_numeric_columns(df_merged_future_predictions_copy)
+
+    #df_merged_future_predictions_copy[numeric_cols] = scaler.fit_transform(df_merged_future_predictions_copy[numeric_cols])
+    
+    #df_merged_future_predictions_copy[numeric_cols] = df_merged_future_predictions_copy[numeric_cols]
+
+    return (df_merged_future_predictions_copy).to_dict(orient='records')
