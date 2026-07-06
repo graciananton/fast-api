@@ -71,6 +71,7 @@ def test_model(request: ModelRequest = Depends())->dict[str,float]:
     print("Return RMSE result")
     return {"RMSE": forest_reg_rmse}
 
+""""
 @router.get("/levelAnalysis")
 def level_analysis(request: ModelRequest = Depends()):
    date = datetime.fromisoformat(request.time.replace("Z", "+00:00")) # converts iso8601 String to datetime object (Date())
@@ -79,7 +80,7 @@ def level_analysis(request: ModelRequest = Depends()):
    response = f"http://gracian.ca/laravel/public/api/levels?stationId={station_id}&time={date}&level={level}"
    response = response.json()
    return response
-   
+"""
 
     
 
@@ -180,8 +181,8 @@ def plotted_future_set(request: ModelRequest = Depends()):
 
 @router.get("/future_set")
 def future_set(request: ModelRequest = Depends()):
-    
-    scaler = StandardScaler()
+
+    #scaler = StandardScaler()
 
     df_merged = utils.get_station_df(request.station_id, request.days)
 
