@@ -224,9 +224,11 @@ def test_model(model, predictors):
 
 def get_future_df(df_merged):
     df_merged_past, df_merged_future = split_past_future(df_merged)
-    
+
     print("df merged future")
     print(df_merged_future)
+    print(type(df_merged_future))
+    
     return add_index(df_merged_past), add_index(df_merged_future)
 
 
