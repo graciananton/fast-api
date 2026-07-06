@@ -89,7 +89,7 @@ def level_analysis(request: ModelRequest = Depends()):
        print(err)
    
 
-   return response
+   return data
 
     
 
