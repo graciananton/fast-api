@@ -12,7 +12,7 @@ import requests
 import os
 import numpy as np
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 
 class ModelRequest(BaseModel):
     station_id: str
@@ -77,6 +77,8 @@ def level_analysis(request: ModelRequest = Depends())->dict[str,float]:
    station_id = request.station_id
    level = request.level
    time = datetime.fromisoformat(str(request.time))
+   timeDayLater = time + timedelta(days = 1)
+   timeDayBefore = time - timedelta(days = 1)
 
    try:
         response = requests.get(f"http://gracian.ca/laravel/public/api/levels?stationId={station_id}")
@@ -87,14 +89,23 @@ def level_analysis(request: ModelRequest = Depends())->dict[str,float]:
         if len(data) < 1:
             raise ValueError("Data length is < 1")
         
-        month = time.month
-        day = time.day
 
         df = pd.DataFrame(data)
 
         df['time'] = pd.to_datetime(df['time'])
 
-        filtered_df = df[((df['time']).dt.month == month) & ((df['time']).dt.day == day)]
+        filtered_df = df[
+                            (
+                                ((df['time']).dt.month == time.month) and
+                                ((df['time']).dt.month == timeDayLater.month) and
+                                ((df['time']).dt.month == timeDayBefore.month)
+                            ) & 
+                            (
+                                ((df['time']).dt.day == time.day) and
+                                ((df['time']).dt.day == timeDayLater.month) and
+                                ((df['time']).dt.day == timeDayBefore.day)
+                            )
+                        ]
         
         levels = filtered_df['level'].tolist()
 
