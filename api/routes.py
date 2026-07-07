@@ -90,8 +90,15 @@ def level_analysis(request: ModelRequest = Depends()):
         month = dt.month
         day = dt.day
 
+        df = pd.DataFrame(data)
+
+        filtered_df = df[(datetime(df['time']).fromisoformat()).month == month and (datetime(df['time']).fromisoformat()).day == day]
         
+        levels = df['level'].tolist()
+
         
+
+
    except Exception as err:
        print(err)
    

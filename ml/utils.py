@@ -76,8 +76,6 @@ def extract_numeric_columns(df):
     return numeric_cols
 
 def plot(df, category = "past")->Response:
-    buf = io.BytesIO()
-    #+" - "+df[['stationId']].iloc[0]['stationId']
     plt.figure()
 
     if category == "future":
@@ -201,11 +199,12 @@ def plot(df, category = "past")->Response:
 
         ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha='center')
 
+    buffer = io.BytesIO()
 
-    plt.savefig(buf, format="png")
-    buf.seek(0)
+    plt.savefig(buffer, format="png")
     plt.close()
-    return Response(content=buf.getvalue(), media_type="image/png")
+
+    return Response(content=buffer.getvalue(), media_type="image/png")
 
 def getTimes(tickLabel):
     x = tickLabel.get_position()[0]
