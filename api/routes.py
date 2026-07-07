@@ -73,12 +73,11 @@ def test_model(request: ModelRequest = Depends())->dict[str,float]:
 
 
 @router.get("/levelAnalysis")
-def level_analysis(request: ModelRequest = Depends())->float:
+def level_analysis(request: ModelRequest = Depends())->dict[str,float]:
    station_id = request.station_id
    level = request.level
    time = datetime.fromisoformat(str(request.time))
 
-   print(type(time))
    try:
         response = requests.get(f"http://gracian.ca/laravel/public/api/levels?stationId={station_id}")
         response.raise_for_status()
@@ -107,8 +106,7 @@ def level_analysis(request: ModelRequest = Depends())->float:
     
         percentile = np.interp(level, levels, percentiles, left = percentiles[0] - step/2, right = percentiles[-1] + step/2)
 
-        return float(percentile)
-
+        return {"percentile": float(percentile)}
 
    except Exception as err:
        print(err)
