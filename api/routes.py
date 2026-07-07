@@ -96,13 +96,13 @@ def level_analysis(request: ModelRequest = Depends())->dict[str,float]:
 
         filtered_df = df[
                             (
-                                ((df['time']).dt.month == time.month) and
-                                ((df['time']).dt.month == timeDayLater.month) and
+                                ((df['time']).dt.month == time.month) |
+                                ((df['time']).dt.month == timeDayLater.month) |
                                 ((df['time']).dt.month == timeDayBefore.month)
                             ) & 
                             (
-                                ((df['time']).dt.day == time.day) and
-                                ((df['time']).dt.day == timeDayLater.month) and
+                                ((df['time']).dt.day == time.day) |
+                                ((df['time']).dt.day == timeDayLater.month) |
                                 ((df['time']).dt.day == timeDayBefore.day)
                             )
                         ]
