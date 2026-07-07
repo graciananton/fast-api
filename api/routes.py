@@ -19,7 +19,7 @@ class ModelRequest(BaseModel):
     days: Optional[int] = 50
     level: Optional[float] = 3.0
     time: Optional[datetime] = datetime.now().isoformat()
-    mode: Optional[datetime] = "percentile"
+    mode: Optional[str] = "percentile"
 
 router = APIRouter()
 
@@ -81,7 +81,7 @@ def level_analysis(request: ModelRequest = Depends())->dict[str,float]:
    timeDayLater = time + timedelta(days = 1)
    timeDayBefore = time - timedelta(days = 1)
    mode = request.mode
-   
+
    try:
         response = requests.get(f"http://gracian.ca/laravel/public/api/levels?stationId={station_id}")
         response.raise_for_status()
@@ -104,7 +104,7 @@ def level_analysis(request: ModelRequest = Depends())->dict[str,float]:
                             ) & 
                             (
                                 ((df['time']).dt.day == time.day) |
-                                ((df['time']).dt.day == timeDayLater.month) |
+                                ((df['time']).dt.day == timeDayLater.day) |
                                 ((df['time']).dt.day == timeDayBefore.day)
                             )
                         ]
@@ -113,13 +113,17 @@ def level_analysis(request: ModelRequest = Depends())->dict[str,float]:
 
         levels.sort()
 
-        start, stop, step  = 0.0, 100.0, 100/len(levels)
+        if mode == "percentile":
+            start, stop, step  = 0.0, 100.0, 100/len(levels)
 
-        percentiles = np.arange(start, stop, step)
-    
-        percentile = np.interp(level, levels, percentiles, left = percentiles[0] - step/2, right = percentiles[-1] + step/2)
+            percentiles = np.arange(start, stop, step)
+        
+            percentile = np.interp(level, levels, percentiles, left = percentiles[0] - step/2, right = percentiles[-1] + step/2)
 
-        return {"percentile": float(percentile)}
+            return {"percentile": float(percentile)}
+        else:
+            value = np.percentile(levels, level)
+            return {"value": float(value)}
 
    except Exception as err:
        print(err)
