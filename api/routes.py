@@ -88,7 +88,6 @@ def level_analysis(request: ModelRequest = Depends())->float:
         if len(data) < 1:
             raise ValueError("Data length is < 1")
         
-
         month = time.month
         day = time.day
 
@@ -96,23 +95,19 @@ def level_analysis(request: ModelRequest = Depends())->float:
 
         df['time'] = pd.to_datetime(df['time'])
 
-        print("Time column in df")
-        print(df['time'])
-
         filtered_df = df[((df['time']).dt.month == month) & ((df['time']).dt.day == day)]
         
-        print("Filtered df")
-        print(filtered_df)
+        levels = filtered_df['level'].tolist()
 
-        levels = filtered_df['level'].tolist().sort()
+        levels.sort()
 
-        start, stop, step  = 0, 100, 100/len(levels)
+        start, stop, step  = 0.0, 100.0, 100/len(levels)
 
-        percentiles = [i for i in range(start, stop, step)]
+        percentiles = np.arange(start, stop, step)
+    
+        percentile = np.interp(level, levels, percentiles, left = percentiles[0] - step/2, right = percentiles[-1] + step/2)
 
-        percentile = np.interp(level, levels, percentiles, left = percentiles[0] - step, right = percentiles[-1] + step)
-
-        return percentile
+        return float(percentile)
 
 
    except Exception as err:
