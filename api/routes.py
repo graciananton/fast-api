@@ -19,6 +19,7 @@ class ModelRequest(BaseModel):
     days: Optional[int] = 50
     level: Optional[float] = 3.0
     time: Optional[datetime] = datetime.now().isoformat()
+    mode: Optional[datetime] = "percentile"
 
 router = APIRouter()
 
@@ -79,7 +80,8 @@ def level_analysis(request: ModelRequest = Depends())->dict[str,float]:
    time = datetime.fromisoformat(str(request.time))
    timeDayLater = time + timedelta(days = 1)
    timeDayBefore = time - timedelta(days = 1)
-
+   mode = request.mode
+   
    try:
         response = requests.get(f"http://gracian.ca/laravel/public/api/levels?stationId={station_id}")
         response.raise_for_status()
