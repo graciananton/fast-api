@@ -73,9 +73,10 @@ def test_model(request: ModelRequest = Depends())->dict[str,float]:
 
 
 @router.get("/levelAnalysis")
-def level_analysis(request: ModelRequest = Depends()):
+def level_analysis(request: ModelRequest = Depends())->float:
    station_id = request.station_id
-
+   level = request.level
+   time = request.time
    try:
         response = requests.get(f"http://gracian.ca/laravel/public/api/levels?stationId={station_id}")
         response.raise_for_status()
@@ -85,25 +86,31 @@ def level_analysis(request: ModelRequest = Depends()):
         if len(data) < 1:
             raise ValueError("Data length is < 1")
         
-        dt = datetime.fromisoformat(request.time)
+        dt = datetime(time)
 
         month = dt.month
         day = dt.day
 
         df = pd.DataFrame(data)
 
-        filtered_df = df[(datetime(df['time']).fromisoformat()).month == month and (datetime(df['time']).fromisoformat()).day == day]
+        filtered_df = df[(datetime(df['time'])).month == month and (datetime(df['time'])).day == day]
         
-        levels = df['level'].tolist()
+        levels = filtered_df['level'].tolist().sort()
 
-        
+        start, stop, step  = 0, 100, 100/len(levels)
+
+        percentiles = [i for i in range(start, stop, step)]
+
+        percentile = np.interp(level, levels, percentiles, left = percentiles[0] - step, right = percentiles[-1] + step)
+
+        return percentile
 
 
    except Exception as err:
        print(err)
    
 
-   return data
+   return percentile
 
     
 
