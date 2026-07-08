@@ -105,13 +105,14 @@ def plot(df, category = "past")->Response:
 
         level = df.loc[df['measuredAt'] == utc_time, 'levelAtHour'].iloc[0]
         
-        
+
         ax = before.plot(
             kind = 'line', 
             x='measuredAt', 
             y='levelAtHour', 
             color='#0057E7'
         )
+
         ax.get_legend().remove()
 
         ax.spines["top"].set_linewidth(0)
@@ -319,6 +320,9 @@ def convert_to_df(data):
     return df
 
 def get_data_by_url(url):
-    res = requests.get(url)
+    res = requests.get(url, timeout = 1200)
+    print("Data result")
+    print(res)
+
     data = res.json()
     return data
