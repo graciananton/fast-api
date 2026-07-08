@@ -224,6 +224,9 @@ def plotted_future_set(request: ModelRequest = Depends()):
 
     return df_merged_future_predictions.to_dict(orient="records")
 
+@router.get("/stationMessages")
+def station_messages(request: ModelRequest = Depends()):
+    
 @router.get("/future_set")
 def future_set(request: ModelRequest = Depends()):
 
