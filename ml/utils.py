@@ -1,5 +1,6 @@
 import requests
-from dotenv import load_dotenv
+from dotenv import load_dotenv, dotenv_values
+from openai import OpenAI
 import os
 from datetime import datetime, timezone, timedelta
 import pandas as pd
@@ -15,15 +16,14 @@ from datetime import datetime, UTC
 import matplotlib.dates as mdates
 from zoneinfo import ZoneInfo
 import re
+import json
 
-load_dotenv() 
 
-STATIONS_URL = os.getenv("STATIONS_URL")
-READINGS_URL = os.getenv("READINGS_URL")
-WEATHER_URL = os.getenv("WEATHER_URL")
+variables = dotenv_values("../.env")
+OPENAI_API_KEY = variables.get("OPENAI_API_KEY")
 
 def get_stations()->dict:
-    res = requests.get(STATIONS_URL)
+    res = requests.get("https://gracian.ca/laravel/public/api/stations")
     stations = res.json()
     return stations
 
@@ -74,6 +74,42 @@ def extract_predictors_labels(df):
 def extract_numeric_columns(df):
     numeric_cols = df.select_dtypes(include=['number']).columns
     return numeric_cols
+
+def generate_station_message(station_id):
+    print("open ai key")
+    print(OPENAI_API_KEY)
+    client = OpenAI(
+        api_key=OPENAI_API_KEY
+    )
+
+    stats = requests.get("http://gracian.ca/laravel/public/api/stats?stationId="+station_id)
+
+    predictions = requests.get('http://gracian.ca/laravel/public/api/future?stationId='+station_id+'&order=desc&limit=48')
+
+    predictions = predictions.json()
+    stats = stats.json()
+
+    df_predictions = pd.DataFrame(predictions)
+
+    print(stats)
+    print(type(stats))
+
+    print(df_predictions)
+
+    df_predictions['percentile'] = df_predictions['percentile'].apply(float)
+
+    mean_percentile = sum(df_predictions['percentile']) / len(df_predictions)
+
+    stats['meanPercentile'] = mean_percentile
+
+    response = client.responses.create(
+        model="gpt-4.1-nano-2025-04-14",
+        instructions="Write a concise summary of the data.",
+        input=json.dumps(stats)
+    )
+
+    return {"message": response.output_text}
+
 
 def plot(df, category = "past")->Response:
     plt.figure()
