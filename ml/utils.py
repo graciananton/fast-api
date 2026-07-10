@@ -118,41 +118,36 @@ def generate_station_message(station_id):
 
 
 def plot(df, category = "past")->Response:
-    plt.figure()
+    
 
     if category == "future":
-        utc_time = datetime.now(UTC).replace(
+        fig, (predictions, weather) = plt.subplots(1, 2, figsize =(13,4))
+
+        current_time = datetime.now(UTC).replace(
             minute=0,
             second=0,
             microsecond=0
-        )
+        ).isoformat()
+        x_text = (current_time + timedelta(minutes=45)).isoformat()
+        x_border = (current_time - timedelta(minutes = 60)).isoformat()
 
-        utc_time_text = utc_time + timedelta(minutes=45)
+        current_time = pd.to_datetime(current_time)
+        x_text = pd.to_datetime(x_text)
+        x_border = pd.to_datetime(x_border)
 
-        utc_time_border = utc_time - timedelta(minutes = 60)
+        before = df[df['measuredAt'] <= current_time]
 
-        utc_time_text.isoformat()
+        after = df[df['measuredAt'] > x_border]
 
-        utc_time.isoformat()
-
-        utc_time_border.isoformat()
-
-        utc_time = pd.to_datetime(utc_time)
-        utc_time_text = pd.to_datetime(utc_time_text)
-        utc_time_border = pd.to_datetime(utc_time_border)
-
-        before = df[df['measuredAt'] <= utc_time]
-
-        after = df[df['measuredAt'] > utc_time_border]
-
-        level = df.loc[df['measuredAt'] == utc_time, 'levelAtHour'].iloc[0]
+        level = df.loc[df['measuredAt'] == current_time, 'levelAtHour'].iloc[0]
         
-
-        ax = before.plot(
+        # used to be ax -> predictions
+        predictions = before.plot(
             kind = 'line', 
             x='measuredAt', 
             y='levelAtHour', 
-            color='#0057E7'
+            color='#0057E7',
+            ax = predictions
         )
 
         ax.get_legend().remove()
@@ -176,9 +171,6 @@ def plot(df, category = "past")->Response:
             ax = ax
         )
 
-        print("Tick labels")
-        print(ax2.get_xticklabels())
-
         timesAfter = map(getTimes, ax2.get_xticklabels())
 
         positions = ax2.get_xticks()
@@ -189,7 +181,7 @@ def plot(df, category = "past")->Response:
 
 
         ax.scatter(
-            utc_time,
+            current_time,
             level,
             color = '#0057E7',
             marker = 'o',
@@ -197,14 +189,14 @@ def plot(df, category = "past")->Response:
         )
 
         ax.axvline(
-            x = utc_time,
+            x = current_time,
             color = 'gray',
             linewidth = 1,
             linestyle = "--"
         )
 
         ax.text(
-            x = utc_time_text,
+            x = x_text,
             y = level + 0.0001,
             s = str(round(level,2)) + "m", # get 0th indexed value from series pandas
             fontsize=10,
@@ -216,7 +208,28 @@ def plot(df, category = "past")->Response:
         ax.set_ylabel("Water Level (m)")
         ax2.get_legend().remove()
 
+        ax3 = before[['precipitation','measuredAt']].plot(
+            kind = "line",
+            x = "measuredAt",
+            y = "precipitation",
+            color='#0057E7',
+            ax = weather
+        )
+
+        after[['precipitation','measuredAt']].plot(
+            kind = 'line',
+            linestyle='--',
+            x='measuredAt',
+            y='precipitation',
+            color='#0057E7',
+            ax = ax3
+        )
+
+        ax3.set_xlabel("Time (Toronto/America)")
+        ax3.set_ylabel("Precipitation (mm)")
+        
     else:
+        plt.figure()
         ax = df.plot(
             kind = 'line', 
             x='measuredAt', 
