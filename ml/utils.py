@@ -128,6 +128,7 @@ def plot(df, category = "past")->Response:
             second=0,
             microsecond=0
         ).isoformat()
+        
         x_text = (current_time + timedelta(minutes=45)).isoformat()
         x_border = (current_time - timedelta(minutes = 60)).isoformat()
 
@@ -141,8 +142,8 @@ def plot(df, category = "past")->Response:
 
         level = df.loc[df['measuredAt'] == current_time, 'levelAtHour'].iloc[0]
         
-        # used to be ax -> predictions
-        predictions = before.plot(
+        # used to be ax -> before_predictions
+        before_predictions = before.plot(
             kind = 'line', 
             x='measuredAt', 
             y='levelAtHour', 
@@ -150,65 +151,68 @@ def plot(df, category = "past")->Response:
             ax = predictions
         )
 
-        ax.get_legend().remove()
+        for ax in (predictions, weather):
 
-        ax.spines["top"].set_linewidth(0)
+            ax.get_legend().remove()
 
-        ax.spines["bottom"].set_color("gray")
-        ax.spines["bottom"].set_linewidth(1)
+            ax.spines["top"].set_linewidth(0)
 
-        ax.spines["left"].set_color("gray")
-        ax.spines["left"].set_linewidth(1)
+            ax.spines["bottom"].set_color("gray")
+            ax.spines["bottom"].set_linewidth(1)
 
-        ax.spines["right"].set_linewidth(0)
-        
-        ax2 = after.plot(
+            ax.spines["left"].set_color("gray")
+            ax.spines["left"].set_linewidth(1)
+
+            ax.spines["right"].set_linewidth(0)
+
+            ax.scatter(
+                current_time,
+                level,
+                color = '#0057E7',
+                marker = 'o',
+                s=30
+            )
+
+            ax.axvline(
+                x = current_time,
+                color = 'gray',
+                linewidth = 1,
+                linestyle = "--"
+            )
+
+            ax.text(
+                x = x_text,
+                y = level + 0.0001,
+                s = str(round(level,2)) + "m", # get 0th indexed value from series pandas
+                fontsize=10,
+                color="gray",
+                fontweight = 'bold'
+            )
+
+            ax.set_xlabel("Time (Toronto/America)")
+            ax.set_ylabel("Water Level (m)")
+
+        # used to be ax2 -> after_predictions
+        after_predictions = after.plot(
             kind = 'line', 
             x='measuredAt', 
             y='levelAtHour', 
             color='#0057E7',
             linestyle="--", 
-            ax = ax
+            ax = before_predictions
         )
 
-        timesAfter = map(getTimes, ax2.get_xticklabels())
+        timesAfter = map(getTimes, after_predictions.get_xticklabels())
 
-        positions = ax2.get_xticks()
+        positions = after_predictions.get_xticks()
     
-        ax2.set_xticks(positions)
+        after_predictions.set_xticks(positions)
 
-        ax2.set_xticklabels(timesAfter, rotation=0, ha='center')
+        after_predictions.set_xticklabels(timesAfter, rotation=0, ha='center')
 
 
-        ax.scatter(
-            current_time,
-            level,
-            color = '#0057E7',
-            marker = 'o',
-            s=30
-        )
 
-        ax.axvline(
-            x = current_time,
-            color = 'gray',
-            linewidth = 1,
-            linestyle = "--"
-        )
-
-        ax.text(
-            x = x_text,
-            y = level + 0.0001,
-            s = str(round(level,2)) + "m", # get 0th indexed value from series pandas
-            fontsize=10,
-            color="gray",
-            fontweight = 'bold'
-        )
-
-        ax.set_xlabel("Time (Toronto/America)")
-        ax.set_ylabel("Water Level (m)")
-        ax2.get_legend().remove()
-
-        ax3 = before[['precipitation','measuredAt']].plot(
+        before_weather = before[['precipitation','measuredAt']].plot(
             kind = "line",
             x = "measuredAt",
             y = "precipitation",
@@ -216,17 +220,14 @@ def plot(df, category = "past")->Response:
             ax = weather
         )
 
-        after[['precipitation','measuredAt']].plot(
+        after_weather = after[['precipitation','measuredAt']].plot(
             kind = 'line',
             linestyle='--',
             x='measuredAt',
             y='precipitation',
             color='#0057E7',
-            ax = ax3
+            ax = before_weather
         )
-
-        ax3.set_xlabel("Time (Toronto/America)")
-        ax3.set_ylabel("Precipitation (mm)")
         
     else:
         plt.figure()
