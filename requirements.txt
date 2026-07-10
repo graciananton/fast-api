@@ -12,3 +12,5 @@ dotenv
 datetime
 joblib
 typing
+pathlib
+openai
