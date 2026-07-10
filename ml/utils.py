@@ -1,5 +1,5 @@
 import requests
-from dotenv import load_dotenv, dotenv_values
+from dotenv import load_dotenv
 from openai import OpenAI
 import os
 from datetime import datetime, timezone, timedelta
@@ -17,10 +17,16 @@ import matplotlib.dates as mdates
 from zoneinfo import ZoneInfo
 import re
 import json
+from pathlib import Path
 
+current_working_script_dir = Path(__file__).resolve().parent
+env_dir = current_working_script_dir.parent
 
-variables = dotenv_values("../.env")
-OPENAI_API_KEY = variables.get("OPENAI_API_KEY")
+load_dotenv(dotenv_path = env_dir / ".env")
+
+open_ai_api_key = os.getenv("OPENAI_API_KEY")
+print("open_ai_api_key")
+print(open_ai_api_key)
 
 def get_stations()->dict:
     res = requests.get("https://gracian.ca/laravel/public/api/stations")
@@ -77,9 +83,9 @@ def extract_numeric_columns(df):
 
 def generate_station_message(station_id):
     print("open ai key")
-    print(OPENAI_API_KEY)
+    print(open_ai_api_key)
     client = OpenAI(
-        api_key=OPENAI_API_KEY
+        api_key=open_ai_api_key
     )
 
     stats = requests.get("http://gracian.ca/laravel/public/api/stats?stationId="+station_id)
