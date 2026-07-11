@@ -96,6 +96,9 @@ def generate_station_message(station_id):
     stats['peakTime'] = formatted_peak_time
     stats['lastUpdated'] = formatted_last_updated
 
+
+    print(json.dumps(stats))
+    
     response = client.responses.create(
         model="gpt-4.1-nano-2025-04-14",
         instructions="Write a concise summary of the data.",
@@ -105,7 +108,9 @@ def generate_station_message(station_id):
     return {"message": response.output_text}
 
 def convert_to_formatted_date(time):
-    return str(time.year) + "-" + str(time.month) + "-" + str(time.day) + " " + str(time.hour) + ":" + str(time.minute)
+    toronto_time = time.astimezone(ZoneInfo("America/Toronto"))
+
+    return toronto_time.isoformat()
 
 def plot(df, category = "past")->Response:
     
