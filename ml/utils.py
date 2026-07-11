@@ -91,9 +91,11 @@ def generate_station_message(station_id):
     stats = stats.json()
     
     formatted_peak_time = convert_to_formatted_date(datetime.fromisoformat(stats['peakTime']))
+    formatted_last_updated = convert_to_formatted_date(datetime.fromisoformat(stats['lastUpdated']))
 
     stats['peakTime'] = formatted_peak_time
-    
+    stats['lastUpdated'] = formatted_last_updated
+
     response = client.responses.create(
         model="gpt-4.1-nano-2025-04-14",
         instructions="Write a concise summary of the data.",
@@ -365,8 +367,6 @@ def getTimes(tickLabel):
     dt = mdates.num2date(x, tz=ZoneInfo("America/Toronto"))
     hour = dt.hour
 
-    print("Hour:")
-    print(hour)
     return (str(int(hour) - 12) + " PM") if hour >= 12 else str(hour) + " AM"
 
 
