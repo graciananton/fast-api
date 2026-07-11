@@ -82,34 +82,17 @@ def extract_numeric_columns(df):
     return numeric_cols
 
 def generate_station_message(station_id):
-    print("open ai key")
-    print(open_ai_api_key)
     client = OpenAI(
         api_key=open_ai_api_key
     )
 
     stats = requests.get("http://gracian.ca/laravel/public/api/stats?stationId="+station_id)
 
-    predictions = requests.get('http://gracian.ca/laravel/public/api/future?stationId='+station_id+'&order=desc&limit=48')
-
-    predictions = predictions.json()
     stats = stats.json()
-
-    df_predictions = pd.DataFrame(predictions)
-
-    print(stats)
-    print(type(stats))
-
-    print(df_predictions)
-
-    df_predictions['percentile'] = df_predictions['percentile'].apply(float)
-
-
-    mean_percentile = sum(df_predictions['percentile']) / len(df_predictions)
-
-    stats['meanPercentile'] = mean_percentile
     
-    percentile = requests.get("http://gracian.ca/laravel/public/api/levelAnalysis?stationId="+station_id+"&level=3.42&time=2026-07-07T19:45:30.123456Z&mode=percentile")
+    formatted_peak_time = convert_to_formatted_date(datetime.fromisoformat(stats['peakTime']))
+
+    stats['peakTime'] = formatted_peak_time
     
     response = client.responses.create(
         model="gpt-4.1-nano-2025-04-14",
@@ -119,6 +102,8 @@ def generate_station_message(station_id):
 
     return {"message": response.output_text}
 
+def convert_to_formatted_date(time):
+    return str(time.year) + "-" + str(time.month) + "-" + str(time.day) + " " + str(time.hour) + ":" + str(time.minute)
 
 def plot(df, category = "past")->Response:
     
