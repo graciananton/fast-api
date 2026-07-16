@@ -1,4 +1,5 @@
-    fig, ((predictions, precipitation), (temperature, wind_speed)) = plt.subplots(2, 2, figsize =(13,6))
+""""
+fig, ((predictions, precipitation), (temperature, wind_speed)) = plt.subplots(2, 2, figsize =(13,6))
 
     current_time = datetime.now(UTC).replace(
         minute=0,
@@ -294,3 +295,4 @@
     )
 
     return df_merged_future_predictions.to_dict(orient="records")
+"""
