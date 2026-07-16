@@ -155,24 +155,15 @@ def plot_test(request: ModelRequest = Depends())->Response:
 
 
 
-@router.get("/plot_train",response_class=Response)
+@router.get("/plot_train/v/temperature",response_class=Response)
 def plot_train(request: ModelRequest = Depends())->Response:
-    print("Plot Train")
-    #scaler = StandardScaler()
-
     df_merged = utils.get_station_df(request.station_id,request.days)
 
     print(df_merged)
 
     df_merged_past_training_set, df_merged_past_test_set = utils.get_past_training_test_df(df_merged)
         
-    #df_merged_past_training_set_copy = df_merged_past_training_set.copy()
-
-    #numeric_cols = utils.extract_numeric_columns(df_merged_past_training_set_copy)
-
-    #df_merged_past_training_set_copy[numeric_cols] = scaler.fit_transform(df_merged_past_training_set_copy[numeric_cols])
-
-    return utils.plot(df_merged_past_training_set)
+    return utils.plot_past(df_merged_past_training_set)
 
 
 @router.get("/plot_future/v/temperature")

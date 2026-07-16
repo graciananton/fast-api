@@ -123,22 +123,33 @@ def adjust_ticks(ax):
 
     return ax
 
+def mapping(category, option):
+    axes = {'temperature_2m':'Temperature (°C)', 'precipitation':'Precipitation (mm)', 'wind_speed_10m':'Wind Speed (km/hr)'}
+    legend = {'temperature_2m':'Temperature', 'precipitation':'Precipitation', 'wind_speed_10m':'Wind Speed'}
+    
+    if category in axes:
+        if option == 'axes':
+                return axes[category]
+        else:
+            return legend[category]
+    else:
+        return axes['temperature_2m']
+
+
 def plot_future(df, category = "temperature_2m")->Response:
     plt.figure()
     print(df)
     
-    axes = {'temperature_2m':'Temperature (°C)', 'precipitation':'Precipitation (mm)', 'wind_speed_10m':'Wind Speed (km/hr)'}
-    legend = {'temperature_2m':'Temperature', 'precipitation':'Precipitation', 'wind_speed_10m':'Wind Speed'}
+    ax = df.plot(x='measuredAt', y='levelAtHour', marker='o', markersize=4, color='#0057E7', label = 'Water Level')
 
-    ax = df.plot(x='measuredAt', y='levelAtHour', marker='o', color='#0057E7', label = 'Water Level')
-
-    ax2 = df.plot(x='measuredAt', y = category, ax = ax, secondary_y = True, color='orange', marker='o', label = legend[category])
-
+    ax2 = df.plot(x='measuredAt', y = category, markersize=4, ax = ax, secondary_y = True, color='orange', marker='o', label = mapping(category, "legend"))
+    
     ax.set_ylabel('Water Level (m)', color='gray')
+    ax.set_xlabel("Measured At")
 
-    ax.right_ax.set_ylabel(axes[category], color='gray')
+    ax.right_ax.set_ylabel(mapping(category, 'axes'), color='gray')
 
-    ax.set_title(f"Water Level v. {legend[category]}")
+    ax.set_title(f"Water Level v. {legend[category]} - {df['stationId'].iloc[0]}")
 
     ax.spines['top'].set_visible(False)
 
@@ -146,12 +157,16 @@ def plot_future(df, category = "temperature_2m")->Response:
 
     buffer = io.BytesIO()
 
-    plt.savefig(buffer, format="png")
+    plt.savefig(
+        buffer, 
+        format="png",
+        bbox_inches="tight"
+    )
     plt.close()
 
     return Response(content=buffer.getvalue(), media_type="image/png")
 
-def plot_past(df)->Response:
+def plot_past(df, category = 'temperature_2m')->Response:
     plt.figure()
     ax = df.plot(
         kind = 'line', 
@@ -160,27 +175,17 @@ def plot_past(df)->Response:
         color='#0057E7'
     )
 
-    ax.spines["top"].set_linewidth(0)
+    ax2 = df.plot(
+        kind = 'line',
+        x = 'measuredAt',
+        y = 
+    )
 
-    ax.spines["bottom"].set_color("gray")
-    ax.spines["bottom"].set_linewidth(1)
-
-    ax.spines["left"].set_color("gray")
-    ax.spines["left"].set_linewidth(1)
-
-    ax.spines["right"].set_linewidth(0)
-
-    #timesAfter = map(getTimes, ax.get_xticklabels())
-
-    #positions = ax.get_xticks()
-
-    #ax.set_xticks(positions)
-
-    ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha='center')
+    #ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha='center')
 
     buffer = io.BytesIO()
 
-    plt.savefig(buffer, format="png")
+    plt.savefig(buffer, bbox_inches="tight", format="png")
     plt.close()
 
     return Response(content=buffer.getvalue(), media_type="image/png")
