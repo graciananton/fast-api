@@ -132,7 +132,7 @@ def mapping(category, option):
 
 
 def plot_future(df, category = "temperature_2m")->Response:
-    plt.figure()
+    plt.figure(figsize=(10,5))
     
     ax = df.plot(x='measuredAt', y='levelAtHour', marker='o', markersize=4, color='#0057E7', label = 'Water Level')
 
