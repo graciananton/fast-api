@@ -175,11 +175,20 @@ def plot_train(request: ModelRequest = Depends())->Response:
     return utils.plot(df_merged_past_training_set)
 
 
-@router.get("/plot_future")
-def plot_future(request: ModelRequest = Depends())->Response:
-    df_merged_future_predictions_copy = pd.DataFrame(plotted_future_set(request))
+@router.get("/plot_future/v/temperature")
+def plot_future_temperature(request: ModelRequest = Depends())->Response:
+    df_merged_future_predictions = pd.DataFrame(plotted_future_set(request))
+    return utils.plot_future(df_merged_future_predictions, 'temperature_2m')
 
-    return utils.plot(df_merged_future_predictions_copy, 'future')
+@router.get("/plot_future/v/wind_speed")
+def plot_future_temperature(request: ModelRequest = Depends())->Response:
+    df_merged_future_predictions = pd.DataFrame(plotted_future_set(request))
+    return utils.plot_future(df_merged_future_predictions, 'wind_speed_10m')
+
+@router.get("/plot_future/v/precipitation")
+def plot_future_temperature(request: ModelRequest = Depends())->Response:
+    df_merged_future_predictions = pd.DataFrame(plotted_future_set(request))
+    return utils.plot_future(df_merged_future_predictions, 'precipitation')
 
 #@router.get("/future_set")
 def plotted_future_set(request: ModelRequest = Depends()):
