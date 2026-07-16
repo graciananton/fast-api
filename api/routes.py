@@ -148,7 +148,6 @@ def plot_test(request: ModelRequest = Depends())->Response:
     df_merged_past_training_set, df_merged_past_test_set = utils.get_past_training_test_df(df_merged)
     return utils.plot(df_merged_past_test_set, 'wind_speed_10m')
 
-
 @router.get("/plot_test/v/precipitation",response_class=Response)
 def plot_train(request: ModelRequest = Depends())->Response:
     df_merged = utils.get_station_df(request.station_id,request.days)
