@@ -141,18 +141,8 @@ def plot_future(df, category = "temperature_2m")->Response:
     ax.set_title(f"Water Level v. {legend[category]}")
 
     ax.spines['top'].set_visible(False)
-    
-    ax = adjust_ticks(ax)
 
-    ax.legend(
-        loc = "center left",
-        bbox_to_anchor=(-0.03,-0.22)
-    )
-    ax.set_xlabel("Measured At")
-    ax2.legend(
-        loc = "center left",
-        bbox_to_anchor=(-0.03,-0.13)
-    )
+   # ax = adjust_ticks(ax)
 
     buffer = io.BytesIO()
 

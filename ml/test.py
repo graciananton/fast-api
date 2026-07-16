@@ -214,3 +214,83 @@
     # dot for current level/current rain text
     # current level/current rain text
     # ylabel
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    df_merged = utils.get_station_df(request.station_id, request.days)
+
+    df_merged_past, df_merged_future = utils.get_future_df(df_merged)
+
+    df_merged_future = pd.concat(
+        [
+            df_merged_past.iloc[-30:],
+            df_merged_future
+        ],
+        ignore_index=True
+    )
+
+    df_merged_future_predictors, df_merged_future_labels = utils.extract_predictors_labels(df_merged_future)
+
+    model_path = f"models/forest_reg_{request.station_id}.pkl"
+    forest_reg = joblib.load(model_path)
+
+    predictions = utils.test_model(forest_reg, df_merged_future_predictors)
+
+    predictions = pd.DataFrame(
+        predictions,
+        columns=["levelAtHour"]
+    ).reset_index(drop=True)
+
+    predictions["measuredAt"] = (
+        df_merged_future["measuredAt"]
+        .reset_index(drop=True)
+    )
+
+    print("predictions")
+    print(predictions)
+    
+    df_merged_future_predictions = (
+        df_merged_future
+            .drop(columns=["levelAtHour"])
+            .merge(
+                predictions,
+                on="measuredAt",
+                how="left"
+            )
+    )
+
+    return df_merged_future_predictions.to_dict(orient="records")
