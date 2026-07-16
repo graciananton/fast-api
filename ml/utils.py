@@ -25,8 +25,6 @@ env_dir = current_working_script_dir.parent
 load_dotenv(dotenv_path = env_dir / ".env")
 
 open_ai_api_key = os.getenv("OPENAI_API_KEY")
-print("open_ai_api_key")
-print(open_ai_api_key)
 
 def get_stations()->dict:
     res = requests.get("https://gracian.ca/laravel/public/api/stations")
@@ -95,9 +93,6 @@ def generate_station_message(station_id):
 
     stats['peakTime'] = formatted_peak_time
     stats['lastUpdated'] = formatted_last_updated
-
-
-    print(json.dumps(stats))
     
     response = client.responses.create(
         model="gpt-4.1-nano-2025-04-14",
@@ -138,7 +133,6 @@ def mapping(category, option):
 
 def plot_future(df, category = "temperature_2m")->Response:
     plt.figure()
-    print(df)
     
     ax = df.plot(x='measuredAt', y='levelAtHour', marker='o', markersize=4, color='#0057E7', label = 'Water Level')
 
@@ -149,22 +143,11 @@ def plot_future(df, category = "temperature_2m")->Response:
 
     ax.right_ax.set_ylabel(mapping(category, 'axes'), color='gray')
 
-    ax.set_title(f"Water Level v. {legend[category]} - {df['stationId'].iloc[0]}")
+    ax.set_title(f"Water Level v. {mapping(category, 'legend')} - {df['stationId'].iloc[0]}")
 
     ax.spines['top'].set_visible(False)
 
-   # ax = adjust_ticks(ax)
-
-    buffer = io.BytesIO()
-
-    plt.savefig(
-        buffer, 
-        format="png",
-        bbox_inches="tight"
-    )
-    plt.close()
-
-    return Response(content=buffer.getvalue(), media_type="image/png")
+    return getResponseImage(plt)
 
 def plot_past(df, category = 'temperature_2m')->Response:
     plt.figure()
@@ -172,17 +155,33 @@ def plot_past(df, category = 'temperature_2m')->Response:
         kind = 'line', 
         x='measuredAt', 
         y='levelAtHour', 
+        marker = 'o',
+        markersize = 1,
         color='#0057E7'
     )
 
     ax2 = df.plot(
         kind = 'line',
         x = 'measuredAt',
-        y = 
+        y = category,
+        color = 'orange',
+        marker = 'o',
+        markersize = 1,
+        secondary_y = True,
+        ax = ax
     )
+
+    ax.set_ylabel("Water Level (m)")
+    ax2.set_ylabel(mapping(category,'axes'))
+    ax.set_xlabel("Measured At")
+
+    ax.set_title(f"Water Level v. {mapping(category, 'legend')} - {df['stationId'].iloc[0]}")
 
     #ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha='center')
 
+    return getResponseImage(plt)
+
+def getResponseImage(plt):
     buffer = io.BytesIO()
 
     plt.savefig(buffer, bbox_inches="tight", format="png")

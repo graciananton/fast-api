@@ -130,32 +130,32 @@ def level_analysis(request: ModelRequest = Depends())->dict[str,float]:
    
     
 
-@router.get("/plot_test",response_class=Response)
+@router.get("/plot_test/v/temperature",response_class=Response)
 def plot_test(request: ModelRequest = Depends())->Response:
-    #scaler = StandardScaler()
     df_merged = utils.get_station_df(request.station_id,request.days)
     df_merged_past_training_set, df_merged_past_test_set = utils.get_past_training_test_df(df_merged)
-    print(df_merged_past_test_set)
-    print(df_merged_past_training_set)
+    return utils.plot(df_merged_past_test_set, 'temperature_2m')
 
-    
-    #df_merged_past_test_set_copy = df_merged_past_test_set.copy()
+@router.get("/plot_test/v/wind_speed",response_class=Response)
+def plot_test(request: ModelRequest = Depends())->Response:
+    df_merged = utils.get_station_df(request.station_id,request.days)
+    df_merged_past_training_set, df_merged_past_test_set = utils.get_past_training_test_df(df_merged)
+    return utils.plot(df_merged_past_test_set, 'wind_speed_10m')
 
-    #numeric_cols = utils.extract_numeric_columns(df_merged_past_test_set_copy)
-
-    #print(df_merged_past_test_set_copy[numeric_cols])
-
-    #df_merged_past_test_set_copy[numeric_cols] = scaler.fit_transform(df_merged_past_test_set_copy[numeric_cols])
-    
-    #return utils.plot(df_merged_past_test_set_copy, "Past Test Set")
-    #print(df_merged_past_test_set_copy)
-    return utils.plot(df_merged_past_test_set)
+@router.get("/plot_test/v/wind_speed",response_class=Response)
+def plot_test(request: ModelRequest = Depends())->Response:
+    df_merged = utils.get_station_df(request.station_id,request.days)
+    df_merged_past_training_set, df_merged_past_test_set = utils.get_past_training_test_df(df_merged)
+    return utils.plot(df_merged_past_test_set, 'wind_speed_10m')
 
 
+@router.get("/plot_test/v/precipitation",response_class=Response)
+def plot_train(request: ModelRequest = Depends())->Response:
+    df_merged = utils.get_station_df(request.station_id,request.days)
+    df_merged_past_training_set, df_merged_past_test_set = utils.get_past_training_test_df(df_merged)
+    return utils.plot_past(df_merged_past_training_set, 'precipitation')
 
-
-
-@router.get("/plot_train/v/temperature",response_class=Response)
+@router.get("/plot_train/v/wind_speed",response_class=Response)
 def plot_train(request: ModelRequest = Depends())->Response:
     df_merged = utils.get_station_df(request.station_id,request.days)
 
@@ -163,8 +163,17 @@ def plot_train(request: ModelRequest = Depends())->Response:
 
     df_merged_past_training_set, df_merged_past_test_set = utils.get_past_training_test_df(df_merged)
         
-    return utils.plot_past(df_merged_past_training_set)
+    return utils.plot_past(df_merged_past_training_set, 'wind_speed_10m')
 
+@router.get("/plot_train/v/precipitation",response_class=Response)
+def plot_train(request: ModelRequest = Depends())->Response:
+    df_merged = utils.get_station_df(request.station_id,request.days)
+
+    print(df_merged)
+
+    df_merged_past_training_set, df_merged_past_test_set = utils.get_past_training_test_df(df_merged)
+        
+    return utils.plot_past(df_merged_past_training_set, 'precipitation')
 
 @router.get("/plot_future/v/temperature")
 def plot_future_temperature(request: ModelRequest = Depends())->Response:
