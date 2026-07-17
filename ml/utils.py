@@ -84,23 +84,72 @@ def generate_station_message(station_id):
         api_key=open_ai_api_key
     )
 
-    stats = requests.get("http://gracian.ca/laravel/public/api/stats?stationId="+station_id)
+    current_hour = datetime.now().strftime("%Y-%m-%dT%H")
 
-    stats = stats.json()
-    
-    formatted_peak_time = convert_to_formatted_date(datetime.fromisoformat(stats['peakTime']))
-    formatted_last_updated = convert_to_formatted_date(datetime.fromisoformat(stats['lastUpdated']))
+    url = f"http://gracian.ca/laravel/public/api/weather?stationId={station_id}&from={current_hour}&limit=1"
 
-    stats['peakTime'] = formatted_peak_time
-    stats['lastUpdated'] = formatted_last_updated
+    current_weather = requests.get(url).json()[0]['weather']
     
+    url = f"http://gracian.ca/laravel/public/api/stats?stationId={station_id}"
+
+    stats = requests.get(url).json()
+
+    current_level = stats['currentLevel']
+
+    url = f"http://gracian.ca/laravel/public/api/weather?stationId={station_id}&from={current_hour}&limit=1&order=desc"
+
+    projected_weather = requests.get(url).json()[0]['weather']
+
+    url = f"http://gracian.ca/laravel/public/api/future?stationId={station_id}&order=desc&limit=1"
+
+    projected_level = requests.get(url).json()[0]
+    projected_level_prediction = projected_level['prediction']
+    projected_level_status = projected_level['percentile']
+
+    url = f"http://gracian.ca/laravel/public/api/stations?stationId={projected_level['stationId']}"
+    station_name = requests.get(url).json()[0]['name']
+
+    data = {
+        "station_name": station_name,
+        "current_weather":{
+            "temperature": current_weather['temperature_2m'],
+            "precipitation": current_weather['precipitation'],
+            "wind_speed": current_weather['wind_speed_10m'],
+        },
+        "current_level":{
+            "level": current_level
+        },
+        "forecast_weather":{
+            "temperature": projected_weather['temperature_2m'],
+            "precipitation": projected_weather['precipitation'],
+            "wind_speed": projected_weather['wind_speed_10m']
+        },
+        "forecast_level":{
+            "level": projected_level_prediction,
+            'status': classify(float(projected_level_status))
+        }
+    }
+
+    print(data)
+
     response = client.responses.create(
         model="gpt-4.1-nano-2025-04-14",
-        instructions="Write a concise summary of the data.",
-        input=json.dumps(stats)
+        instructions=
+        "Summarize the following station data in a natural, concise paragraph. Focus on the key information only. Mention the station name, current weather, current water level, forecasted weather, and forecasted water level with its status. Avoid unnecessary wording, but don't make the summary feel abrupt.",
+        input=json.dumps(data)
     )
 
     return {"message": response.output_text}
+
+def classify(percentile):
+    if percentile < 25:
+        return "lower than usual"
+    elif percentile < 65:
+        return "normal"
+    elif percentile < 80:
+        return "above normal"
+    else:
+        return "extremely high"
 
 def convert_to_formatted_date(time):
     toronto_time = time.astimezone(ZoneInfo("America/Toronto"))

@@ -235,7 +235,7 @@ def station_message(request: ModelRequest = Depends()):
 
 @router.get("/future_set")
 def future_set(request: ModelRequest = Depends()):
-
+    print("Future set - routes")
     #scaler = StandardScaler()
 
     df_merged = utils.get_station_df(request.station_id, request.days)
