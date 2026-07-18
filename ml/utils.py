@@ -197,11 +197,6 @@ def plot_future(df, category = "temperature_2m")->Response:
     ax.spines['right'].set_color(mapping(category,"colors"))
     ax2.spines['right'].set_color(mapping(category,"colors"))
     
-    ax.spines['bottom'].set_color("#6B7280")
-    ax2.spines['bottom'].set_color("#6B7280")
-    ax.spines['top'].set_color("#6B7280")
-    ax2.spines['top'].set_color("#6B7280")
-
     ### ADJUST Y-TICK LABEL COLORS ###
     y_ticks = ax.yaxis.get_ticklabels()
 
@@ -215,7 +210,7 @@ def plot_future(df, category = "temperature_2m")->Response:
 
 
     ax.set_ylabel('Water Level (m)', color='#3F76B8')
-    ax.set_xlabel("Measured At", color="#6B7280")
+    ax.set_xlabel("Measured At")
 
     ax2.set_ylabel(mapping(category, 'axes'), color = mapping(category,'colors'))
 
@@ -224,16 +219,6 @@ def plot_future(df, category = "temperature_2m")->Response:
     ax.grid(True, color="#E5E7EB", linewidth=0.8)
     ax2.grid(True, color="#E5E7EB", linewidth=0.8)    #ax2.spines['top'].set_visible(False)
     #ax.spines['top'].set_visible(False)
-
-    x_ticks = ax.xaxis.get_ticklabels()
-
-    for x_tick in x_ticks:
-        x_tick.set_color("#6B7280")
-
-    x_ticks = ax2.yaxis.get_ticklabels()
-    
-    for x_tick in x_ticks:
-        x_tick.set_color("#6B7280")
 
     return getResponseImage(plt)
 
