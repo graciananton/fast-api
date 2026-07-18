@@ -170,10 +170,13 @@ def adjust_ticks(ax):
 def mapping(category, option):
     axes = {'temperature_2m':'Temperature (°C)', 'precipitation':'Precipitation (mm)', 'wind_speed_10m':'Wind Speed (km/hr)'}
     legend = {'temperature_2m':'Temperature', 'precipitation':'Precipitation', 'wind_speed_10m':'Wind Speed'}
-    
+    colors = {'temperature_2m':'#F59E0B', 'precipitation':'#D81B60', 'wind_speed_10m':'#10B981'}
+
     if category in axes:
         if option == 'axes':
-                return axes[category]
+            return axes[category]
+        elif option == "colors":
+            return colors[category]
         else:
             return legend[category]
     else:
@@ -183,18 +186,54 @@ def mapping(category, option):
 def plot_future(df, category = "temperature_2m")->Response:
     plt.figure(figsize=(10,5))
     
-    ax = df.plot(x='measuredAt', y='levelAtHour', marker='o', markersize=4, color='#0057E7', label = 'Water Level')
+    ax = df.plot(x='measuredAt', y='levelAtHour', marker='o', markersize=4, color='#3F76B8', label = 'Water Level')
 
-    ax2 = df.plot(x='measuredAt', y = category, markersize=4, ax = ax, secondary_y = True, color='orange', marker='o', label = mapping(category, "legend"))
+    ax2 = df.plot(x='measuredAt', y = category, markersize=4, ax = ax, secondary_y = True, color = mapping(category,"colors"), marker='o', label = mapping(category, "legend"))
     
-    ax.set_ylabel('Water Level (m)', color='gray')
-    ax.set_xlabel("Measured At")
+    ### ADJUST left, right, top, bottom SPINE COLORS ###
+    ax.spines['left'].set_color("#3F76B8")
+    ax2.spines['left'].set_color('#3F76B8')
 
-    ax.right_ax.set_ylabel(mapping(category, 'axes'), color='gray')
+    ax.spines['right'].set_color(mapping(category,"colors"))
+    ax2.spines['right'].set_color(mapping(category,"colors"))
+    
+    ax.spines['bottom'].set_color("#6B7280")
+    ax2.spines['bottom'].set_color("#6B7280")
+    ax.spines['top'].set_color("#6B7280")
+    ax2.spines['top'].set_color("#6B7280")
+
+    ### ADJUST Y-TICK LABEL COLORS ###
+    y_ticks = ax.yaxis.get_ticklabels()
+
+    for y_tick in y_ticks:
+        y_tick.set_color("#3F76B8")
+
+    y_ticks = ax2.yaxis.get_ticklabels()
+    
+    for y_tick in y_ticks:
+        y_tick.set_color(mapping(category,"colors"))
+
+
+    ax.set_ylabel('Water Level (m)', color='#3F76B8')
+    ax.set_xlabel("Measured At", color="#6B7280")
+
+    ax2.set_ylabel(mapping(category, 'axes'), color = mapping(category,'colors'))
 
     ax.set_title(f"Water Level v. {mapping(category, 'legend')} - {df['stationId'].iloc[0]}")
+    
+    ax.grid(True, color="#E5E7EB", linewidth=0.8)
+    ax2.grid(True, color="#E5E7EB", linewidth=0.8)    #ax2.spines['top'].set_visible(False)
+    #ax.spines['top'].set_visible(False)
 
-    ax.spines['top'].set_visible(False)
+    x_ticks = ax.xaxis.get_ticklabels()
+
+    for x_tick in x_ticks:
+        x_tick.set_color("#6B7280")
+
+    x_ticks = ax2.yaxis.get_ticklabels()
+    
+    for x_tick in x_ticks:
+        x_tick.set_color("#6B7280")
 
     return getResponseImage(plt)
 
