@@ -128,13 +128,11 @@ def level_analysis(request: ModelRequest = Depends())->dict[str,float]:
    except Exception as err:
        print(err)
    
-    
-
 @router.get("/plot_test/v/temperature",response_class=Response)
 def plot_test(request: ModelRequest = Depends())->Response:
     df_merged = utils.get_station_df(request.station_id,request.days)
     df_merged_past_training_set, df_merged_past_test_set = utils.get_past_training_test_df(df_merged)
-    return utils.plot(df_merged_past_test_set, 'temperature_2m')
+    return utils.plot_past(df_merged_past_test_set, 'temperature_2m')
 
 @router.get("/plot_test/v/wind_speed",response_class=Response)
 def plot_test(request: ModelRequest = Depends())->Response:

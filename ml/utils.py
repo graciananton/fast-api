@@ -183,13 +183,7 @@ def mapping(category, option):
         return axes['temperature_2m']
 
 
-def plot_future(df, category = "temperature_2m")->Response:
-    plt.figure(figsize=(10,5))
-    
-    ax = df.plot(x='measuredAt', y='levelAtHour', marker='o', markersize=4, color='#3F76B8', label = 'Water Level')
-
-    ax2 = df.plot(x='measuredAt', y = category, markersize=4, ax = ax, secondary_y = True, color = mapping(category,"colors"), marker='o', label = mapping(category, "legend"))
-    
+def customization(df, category, ax, ax2):
     ### ADJUST left, right, top, bottom SPINE COLORS ###
     ax.spines['left'].set_color("#3F76B8")
     ax2.spines['left'].set_color('#3F76B8')
@@ -218,6 +212,15 @@ def plot_future(df, category = "temperature_2m")->Response:
     
     ax.grid(True, color="#E5E7EB", linewidth=0.8)
     ax2.grid(True, color="#E5E7EB", linewidth=0.8)    #ax2.spines['top'].set_visible(False)
+
+def plot_future(df, category = "temperature_2m")->Response:
+    plt.figure(figsize=(10,5))
+    
+    ax = df.plot(x='measuredAt', y='levelAtHour', marker='o', markersize=4, color='#3F76B8', label = 'Water Level')
+
+    ax2 = df.plot(x='measuredAt', y = category, markersize=4, ax = ax, secondary_y = True, color = mapping(category,"colors"), marker='o', label = mapping(category, "legend"))
+    
+    customization(df, category, ax, ax2)
     #ax.spines['top'].set_visible(False)
 
     return getResponseImage(plt)
@@ -229,26 +232,23 @@ def plot_past(df, category = 'temperature_2m')->Response:
         x='measuredAt', 
         y='levelAtHour', 
         marker = 'o',
-        markersize = 1,
-        color='#0057E7'
+        markersize = .5,
+        color='#3F76B8'
     )
 
     ax2 = df.plot(
         kind = 'line',
         x = 'measuredAt',
         y = category,
-        color = 'orange',
+        color = mapping(category,"colors"),
         marker = 'o',
         markersize = 1,
         secondary_y = True,
+        label = mapping(category, "legend"),
         ax = ax
     )
 
-    ax.set_ylabel("Water Level (m)")
-    ax2.set_ylabel(mapping(category,'axes'))
-    ax.set_xlabel("Measured At")
-
-    ax.set_title(f"Water Level v. {mapping(category, 'legend')} - {df['stationId'].iloc[0]}")
+    customization(df, category, ax, ax2)
 
     #ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha='center')
 
