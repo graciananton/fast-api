@@ -184,6 +184,7 @@ def mapping(category, option):
 
 
 def customization(df, category, ax, ax2):
+
     ### ADJUST left, right, top, bottom SPINE COLORS ###
     ax.spines['left'].set_color("#3F76B8")
     ax2.spines['left'].set_color('#3F76B8')
@@ -212,6 +213,21 @@ def customization(df, category, ax, ax2):
     
     ax.grid(True, color="#E5E7EB", linewidth=0.8)
     ax2.grid(True, color="#E5E7EB", linewidth=0.8)    #ax2.spines['top'].set_visible(False)
+    
+    ax.get_legend()
+    legend = ax.get_legend()
+    print(legend)
+    if legend:
+        print("legend exists")
+        legend.remove()
+    
+    ax2.get_legend()
+    legend = ax2.get_legend()
+    print(legend)
+    if legend:
+        print("legend2 exists")
+        legend.remove()
+
 
 def plot_future(df, category = "temperature_2m")->Response:
     plt.figure(figsize=(10,5))
