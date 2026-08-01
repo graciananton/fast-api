@@ -22,8 +22,10 @@ class ModelRequest(BaseModel):
     mode: Optional[str] = "percentile"
 
 router = APIRouter()
+"""
 
 @router.get("/")
+
 def running()->dict[str,list[str]]:
     return {"status": os.listdir("models")}
 
@@ -268,3 +270,4 @@ def future_set(request: ModelRequest = Depends()):
     print(df_merged_future_predictions)
 
     return (df_merged_future_predictions).to_dict(orient='records')
+"""
