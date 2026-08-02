@@ -22,10 +22,8 @@ class ModelRequest(BaseModel):
     mode: Optional[str] = "percentile"
 
 router = APIRouter()
-"""
 
 @router.get("/")
-
 def running()->dict[str,list[str]]:
     return {"status": os.listdir("models")}
 
@@ -89,13 +87,15 @@ def level_analysis(request: ModelRequest = Depends())->dict[str,float]:
         response.raise_for_status()
 
         data = response.json()
-
+        
         if len(data) < 1:
             raise ValueError("Data length is < 1")
         
 
         df = pd.DataFrame(data)
 
+        print(df)
+        
         df['time'] = pd.to_datetime(df['time'])
 
         filtered_df = df[
@@ -129,7 +129,8 @@ def level_analysis(request: ModelRequest = Depends())->dict[str,float]:
 
    except Exception as err:
        print(err)
-   
+
+"""
 @router.get("/plot_test/v/temperature",response_class=Response)
 def plot_test(request: ModelRequest = Depends())->Response:
     df_merged = utils.get_station_df(request.station_id,request.days)
@@ -173,11 +174,13 @@ def plot_train(request: ModelRequest = Depends())->Response:
     df_merged_past_training_set, df_merged_past_test_set = utils.get_past_training_test_df(df_merged)
         
     return utils.plot_past(df_merged_past_training_set, 'precipitation')
+"""
 
 @router.get("/plot_future/v/temperature")
 def plot_future_temperature(request: ModelRequest = Depends())->Response:
     df_merged_future_predictions = pd.DataFrame(plotted_future_set(request))
     return utils.plot_future(df_merged_future_predictions, 'temperature_2m')
+
 
 @router.get("/plot_future/v/wind_speed")
 def plot_future_temperature(request: ModelRequest = Depends())->Response:
@@ -241,6 +244,7 @@ def future_set(request: ModelRequest = Depends()):
     df_merged = utils.get_station_df(request.station_id, request.days)
 
     print(df_merged)
+    print(df_merged.info(memory_usage="deep"))
 
     df_merged_past, df_merged_future = utils.get_future_df(df_merged)
 
@@ -270,4 +274,3 @@ def future_set(request: ModelRequest = Depends()):
     print(df_merged_future_predictions)
 
     return (df_merged_future_predictions).to_dict(orient='records')
-"""
