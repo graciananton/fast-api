@@ -16,7 +16,7 @@ from datetime import datetime, timedelta
 
 class ModelRequest(BaseModel):
     station_id: str
-    days: Optional[int] = 50
+    days: Optional[float] = 50.0
     level: Optional[float] = 3.0
     time: Optional[datetime] = datetime.now().isoformat()
     mode: Optional[str] = "percentile"
@@ -78,12 +78,16 @@ def level_analysis(request: ModelRequest = Depends())->dict[str,float]:
    station_id = request.station_id
    level = request.level
    time = datetime.fromisoformat(str(request.time))
+   day = time.day
+   month = time.month
+
    timeDayLater = time + timedelta(days = 1)
    timeDayBefore = time - timedelta(days = 1)
    mode = request.mode
 
    try:
-        response = requests.get(f"http://gracian.ca/laravel/public/api/levels?stationId={station_id}")
+        response = requests.get(f"http://gracian.ca/laravel/public/api/levels?stationId={station_id}&day={day}&month={month}")
+
         response.raise_for_status()
 
         data = response.json()
@@ -93,11 +97,14 @@ def level_analysis(request: ModelRequest = Depends())->dict[str,float]:
         
 
         df = pd.DataFrame(data)
+        print("Memory usage of df")
+        print(df.info(memory_usage='deep'))
 
         print(df)
         
         df['time'] = pd.to_datetime(df['time'])
 
+        """
         filtered_df = df[
                             (
                                 ((df['time']).dt.month == time.month) |
@@ -110,8 +117,9 @@ def level_analysis(request: ModelRequest = Depends())->dict[str,float]:
                                 ((df['time']).dt.day == timeDayBefore.day)
                             )
                         ]
-        
-        levels = filtered_df['level'].tolist()
+        """
+
+        levels = df['level'].tolist()
 
         levels.sort()
 
