@@ -308,11 +308,17 @@ def split_past_future(df):
     df_merged_future = df.iloc[df['levelAtHour'].isna().idxmax():len(df)]
     return df_merged_past, df_merged_future
 
-
 def get_forest_rmse(forest_reg, predictors, labels):
     predictions = test_model(forest_reg, predictors)
     rmse = np.sqrt(mean_squared_error(labels, predictions))
     return rmse
+
+def get_percent_error(forest_reg, predictors, labels):
+    predictions = test_model(forest_reg, predictors)
+    percent_errors = ((labels - predictions)/(labels)).apply(lambda percent_error: abs(percent_error))
+    percent_error = percent_errors.mean()
+    return percent_error
+
 
 def get_past_training_test_df(df):
     df_merged_past, df_merged_future = split_past_future(df)

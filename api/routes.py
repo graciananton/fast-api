@@ -54,10 +54,13 @@ def train_model(request: ModelRequest = Depends()) -> dict[str, str]:
     print("Returning status")
     return {'status':"Finished Re-training The Model"}
 
+
 @router.get("/test_model")
 def test_model(request: ModelRequest = Depends())->dict[str,float]:
     print("Load station data")
-    df_merged = utils.get_station_df(request.station_id,request.days)
+    df_merged = utils.get_station_df(request.station_id, request.days)
+
+    print(df_merged.info(memory_usage='deep'))
     print("Split train test")
     df_merged_past_training_set, df_merged_past_test_set = utils.get_past_training_test_df(df_merged)
     print("Extract test features")
@@ -70,7 +73,9 @@ def test_model(request: ModelRequest = Depends())->dict[str,float]:
     #forest_reg = joblib.load("forest_reg.pkl")
     forest_reg_rmse = utils.get_forest_rmse(forest_reg, df_merged_past_test_set_predictors, df_merged_past_test_set_labels)
     print("Return RMSE result")
-    return {"RMSE": forest_reg_rmse}
+    percent_error = utils.get_percent_error(forest_reg, df_merged_past_test_set_predictors, df_merged_past_test_set_labels)
+
+    return {"RMSE": forest_reg_rmse, "PercentError": percent_error}
 
 
 @router.get("/levelAnalysis")
