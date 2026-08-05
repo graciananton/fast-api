@@ -112,6 +112,7 @@ def generate_station_message(station_id):
 
     data = {
         "station_name": station_name,
+        "prediction_timeframe": "48 hours",
         "current_weather":{
             "temperature": current_weather['temperature_2m'],
             "precipitation": current_weather['precipitation'],
