@@ -35,18 +35,18 @@ load_dotenv(dotenv_path = env_dir / ".env")
 open_ai_api_key = os.getenv("OPENAI_API_KEY")
 
 
-def initialize_model(self):
+def initialize_model():
     return OpenAI(
         api_key=os.environ["OPENAI_API_KEY"]
     )
     
-def tools(self):
+def tools():
     return [
         {
             # this uses the .search() function to return a chunk with a similarity score
             "type": "file_search",
             "vector_store_ids":['vs_6a0726dda1588191bcb83beebd316d5a'],
-            "filters":self.filters(),
+            "filters":filters(),
             "max_num_results": 1,
             "ranking_options": {
                 "score_threshold": 0.5

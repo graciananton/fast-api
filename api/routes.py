@@ -39,11 +39,14 @@ def running()->dict[str,list[str]]:
     return {"status": os.listdir("models")}
 
 @router.post("/generate_response")
-def generate_response(request):
+def generate_response(request: ModelRequest = Depends()):
     print("dl;dskl;sdlk;dskl;dskl;sdlk;sda;kl;dskld;slk;")
     print(request)
-    messages = request.messages
+    messages = request.messages['messages']
+    print("Messages ")
     print(messages)
+    print(type(messages))
+
     client = utils.initialize_model()
     # messages contains all previous user-assistant queries and the latest queries
     """
