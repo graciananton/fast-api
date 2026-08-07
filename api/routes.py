@@ -25,12 +25,12 @@ from pprint import pprint
 from bs4 import BeautifulSoup
 
 class ModelRequest(BaseModel):
-    station_id: str
+    station_id: Optional[str] = '02KF001'
     days: Optional[float] = 50.0
     level: Optional[float] = 3.0
     time: Optional[datetime] = datetime.now().isoformat()
     mode: Optional[str] = "percentile"
-    messages: Optional[list[dict]]
+    messages: Optional[dict[list[dict]]] = {"messages": [{'role':'user','content':'What does this system do?'}]}
 
 router = APIRouter()
 
@@ -39,10 +39,10 @@ def running()->dict[str,list[str]]:
     return {"status": os.listdir("models")}
 
 @router.post("/generate_response")
-def generate_response(request: ModelRequest = Depends())->list[dict]:
-    print("generating messages")
+def generate_response(request):
+    print(request)
     messages = request.messages
-
+    print(messages)
     client = utils.initialize_model()
     # messages contains all previous user-assistant queries and the latest queries
     """
