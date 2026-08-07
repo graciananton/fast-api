@@ -30,7 +30,7 @@ class ModelRequest(BaseModel):
     level: Optional[float] = 3.0
     time: Optional[datetime] = datetime.now().isoformat()
     mode: Optional[str] = "percentile"
-    messages: Optional[dict[list[dict]]] = {"messages": [{'role':'user','content':'What does this system do?'}]}
+    messages: Optional[dict[str, list]] = {"messages": [{'role':'user','content':'What does this system do?'}]}
 
 router = APIRouter()
 
@@ -40,6 +40,7 @@ def running()->dict[str,list[str]]:
 
 @router.post("/generate_response")
 def generate_response(request):
+    print("dl;dskl;sdlk;dskl;dskl;sdlk;sda;kl;dskld;slk;")
     print(request)
     messages = request.messages
     print(messages)
