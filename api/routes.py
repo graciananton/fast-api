@@ -6,7 +6,9 @@ from ml import train
 import pandas as pd
 import joblib
 from pydantic import BaseModel
+
 from typing import Optional
+
 from fastapi import Depends
 import requests
 import os
@@ -14,18 +16,84 @@ import numpy as np
 import json
 from datetime import datetime, timedelta
 
+import requests
+from openai import OpenAI
+from dotenv import load_dotenv
+import os
+import json
+from pprint import pprint
+from bs4 import BeautifulSoup
+
 class ModelRequest(BaseModel):
     station_id: str
     days: Optional[float] = 50.0
     level: Optional[float] = 3.0
     time: Optional[datetime] = datetime.now().isoformat()
     mode: Optional[str] = "percentile"
+    messages: Optional[list[dict]]
 
 router = APIRouter()
 
 @router.get("/")
 def running()->dict[str,list[str]]:
     return {"status": os.listdir("models")}
+
+@router.post("/generate_response")
+def generate_response(request: ModelRequest = Depends())->list[dict]:
+    print("generating messages")
+    messages = request.messages
+
+    client = utils.initialize_model()
+    # messages contains all previous user-assistant queries and the latest queries
+    """
+    messages = [
+        {"role": "user", "content": query}
+    ]
+    
+    while True:
+        if query == "exit":
+            break
+    """
+    response = client.responses.create(
+        model="gpt-4.1",
+        instructions = "Whenever a user asks a question regarding the system, use the document provided in the tools.",
+        tools = utils.tools(),
+        input=messages
+    )
+
+    messages_output = [
+        item for item in response.output
+        if item.type == "message"
+    ]
+
+    if len(messages_output) > 0:
+        minimized_response =  client.responses.create(
+            model = "gpt-4.1-nano-2025-04-14",
+            instructions = 
+            "Summarize the text given this chunk and user query.",
+            input = [
+                messages[0],
+                {
+                    "role":"system",
+                    "content": [
+                        {
+                            "type":"input_text",
+                            "text": messages_output[0].content[0].text
+                        }
+                    ]
+                }
+
+            ]
+        )
+        
+        minimized_response = minimized_response.output_text
+
+        messages.append({
+            "role": "assistant",
+            "content": minimized_response
+        })
+
+    return messages
 
 @router.get("/train_model")
 def train_model(request: ModelRequest = Depends()) -> dict[str, str]:

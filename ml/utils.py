@@ -19,12 +19,57 @@ import re
 import json
 from pathlib import Path
 
+import requests
+from openai import OpenAI
+from dotenv import load_dotenv
+import os
+import json
+from pprint import pprint
+from bs4 import BeautifulSoup
+
 current_working_script_dir = Path(__file__).resolve().parent
 env_dir = current_working_script_dir.parent
 
 load_dotenv(dotenv_path = env_dir / ".env")
 
 open_ai_api_key = os.getenv("OPENAI_API_KEY")
+
+
+def initialize_model(self):
+    return OpenAI(
+        api_key=os.environ["OPENAI_API_KEY"]
+    )
+    
+def tools(self):
+    return [
+        {
+            # this uses the .search() function to return a chunk with a similarity score
+            "type": "file_search",
+            "vector_store_ids":['vs_6a0726dda1588191bcb83beebd316d5a'],
+            "filters":self.filters(),
+            "max_num_results": 1,
+            "ranking_options": {
+                "score_threshold": 0.5
+            },
+        }
+    ]    
+
+def filters()->dict:
+    return {
+        "type": "or",
+        "filters": [
+            {
+                "type": "eq",
+                "key": "version",
+                "value": "v2"
+            },
+            {
+                "type": "eq",
+                "key": "department",
+                "value": "Hydrology"
+            }
+        ]
+    }
 
 def get_stations()->dict:
     res = requests.get("https://gracian.ca/laravel/public/api/stations")
